@@ -82,6 +82,11 @@ public class MergeContext implements Cloneable {
     private boolean equalityMatcher;
 
     /**
+     * Whether to filter EqualityMatcher.
+     */
+    private boolean filterEqualityMatcher;
+
+    /**
      * Whether to run only the diff.
      */
     private boolean diffOnly;
@@ -184,6 +189,7 @@ public class MergeContext implements Cloneable {
         this.conditionalMerge = false;
         this.conditionalOutsideMethods = true;
         this.equalityMatcher = true;
+        this.filterEqualityMatcher = true;
         this.diffOnly = false;
         this.consecutive = false;
         this.dumpMode = DumpMode.NONE;
@@ -216,6 +222,7 @@ public class MergeContext implements Cloneable {
         this.conditionalMerge = toCopy.conditionalMerge;
         this.conditionalOutsideMethods = toCopy.conditionalOutsideMethods;
         this.equalityMatcher = toCopy.equalityMatcher;
+        this.filterEqualityMatcher = toCopy.filterEqualityMatcher;
         this.diffOnly = toCopy.diffOnly;
         this.consecutive = toCopy.consecutive;
         this.dumpMode = toCopy.dumpMode;
@@ -264,6 +271,12 @@ public class MergeContext implements Cloneable {
             setEqualityMatcherEnabled(false);
         } else {
             setEqualityMatcherEnabled(true);
+        }
+
+        if (config.getBoolean(CLI_NOFILTEREQUALITYMATCHER).orElse(false)) {
+            setEqualityMatcherFiltered(false);
+        } else {
+            setEqualityMatcherFiltered(true);
         }
 
         config.getBoolean(CLI_DIFFONLY).ifPresent(diffOnly -> {
@@ -531,6 +544,26 @@ public class MergeContext implements Cloneable {
      */
     public void setEqualityMatcherEnabled(boolean enabled) {
         this.equalityMatcher = enabled;
+    }
+
+    /**
+     * Returns true if results of EqualityMatcher are filtered.
+     *
+     * @return true if results of EqualityMatcher are filtered
+     */
+    public boolean isEqualityMatcherFiltered() {
+        return filterEqualityMatcher;
+    }
+
+    /**
+     * Enable or disable filtering of EqualityMatcher's results.
+     *
+     * Disabling this is a bad idea unless look-ahead is enabled.
+     *
+     * @param enabled true if results EqualityMatcher should be filtered
+     */
+    public void setEqualityMatcherFiltered(boolean enabled) {
+        this.filterEqualityMatcher = enabled;
     }
 
     /**

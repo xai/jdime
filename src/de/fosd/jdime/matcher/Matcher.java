@@ -208,7 +208,7 @@ public class Matcher<T extends Artifact<T>> {
                 calls++;
                 equalityCalls++;
                 LOG.finest(() -> String.format("%s: found equal trees with score: %s", equalityMatcher.getClass().getSimpleName(), left.getTreeSize()));
-                return equalityMatcher.filterMatchings(equalityMatchings, left, right);
+                return context.isEqualityMatcherFiltered() ? equalityMatcher.filterMatchings(equalityMatchings, left, right) : equalityMatchings;
             } else {
                 LOG.finest(() -> String.format("%s: found differing trees", equalityMatcher.getClass().getSimpleName()));
             }
