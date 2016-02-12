@@ -193,23 +193,25 @@ public class Matcher<T extends Artifact<T>> {
             return maxMatching;
         }
 
-        /*
-         * Before firing up potentially expensive matching algorithms, we check whether the trees are identical.
-         * To avoid redundant calls, we save the matchings reported by EqualityMatcher and perform lookups on
-         * subsequent runs.
-         */
-        if (!equalityMatchings.get(left, right).isPresent()) {
-            logMatcherUse(equalityMatcher.getClass(), left, right);
-            equalityMatchings.addAll(equalityMatcher.match(context, left, right));
-        }
+        if (context.isEqualityMatcherEnabled()) {
+            /*
+             * Before firing up potentially expensive matching algorithms, we check whether the trees are identical.
+             * To avoid redundant calls, we save the matchings reported by EqualityMatcher and perform lookups on
+             * subsequent runs.
+             */
+            if (!equalityMatchings.get(left, right).isPresent()) {
+                logMatcherUse(equalityMatcher.getClass(), left, right);
+                equalityMatchings.addAll(equalityMatcher.match(context, left, right));
+            }
 
-        if (equalityMatchings.get(left, right).get().hasFullyMatched()) {
-            calls++;
-            equalityCalls++;
-            LOG.finest(() -> String.format("%s: found equal trees with score: %s", equalityMatcher.getClass().getSimpleName(), left.getTreeSize()));
-            return equalityMatcher.filterMatchings(equalityMatchings, left, right);
-        } else {
-            LOG.finest(() -> String.format("%s: found differing trees", equalityMatcher.getClass().getSimpleName()));
+            if (equalityMatchings.get(left, right).get().hasFullyMatched()) {
+                calls++;
+                equalityCalls++;
+                LOG.finest(() -> String.format("%s: found equal trees with score: %s", equalityMatcher.getClass().getSimpleName(), left.getTreeSize()));
+                return equalityMatcher.filterMatchings(equalityMatchings, left, right);
+            } else {
+                LOG.finest(() -> String.format("%s: found differing trees", equalityMatcher.getClass().getSimpleName()));
+            }
         }
 
         if (!left.matches(right)) {

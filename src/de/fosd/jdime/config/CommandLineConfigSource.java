@@ -58,6 +58,7 @@ public class CommandLineConfigSource extends ConfigSource {
     public static final String CLI_INSPECT = "i";
     public static final String CLI_MODE = "m";
     public static final String CLI_DUMP = "dmp";
+    public static final String CLI_NOEQUALITYMATCHER = "ne";
     public static final String CLI_OUTPUT = "o";
     public static final String CLI_RECURSIVE = "r";
     public static final String CLI_STATS = "s";
@@ -200,6 +201,14 @@ public class CommandLineConfigSource extends ConfigSource {
 
             options.addOption(o);
         }
+
+        o = Option.builder(CLI_NOEQUALITYMATCHER)
+                .longOpt("no-equalitymatcher")
+                .desc("Disable equality matcher.")
+                .hasArg(false)
+                .build();
+
+        options.addOption(o);
 
         o = Option.builder(CLI_OUTPUT)
                 .longOpt("output")

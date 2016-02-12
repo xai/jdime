@@ -77,6 +77,11 @@ public class MergeContext implements Cloneable {
     private boolean conditionalOutsideMethods;
 
     /**
+     * Whether to use EqualityMatcher.
+     */
+    private boolean equalityMatcher;
+
+    /**
      * Whether to run only the diff.
      */
     private boolean diffOnly;
@@ -178,6 +183,7 @@ public class MergeContext implements Cloneable {
     public MergeContext() {
         this.conditionalMerge = false;
         this.conditionalOutsideMethods = true;
+        this.equalityMatcher = true;
         this.diffOnly = false;
         this.consecutive = false;
         this.dumpMode = DumpMode.NONE;
@@ -209,6 +215,7 @@ public class MergeContext implements Cloneable {
     public MergeContext(MergeContext toCopy) {
         this.conditionalMerge = toCopy.conditionalMerge;
         this.conditionalOutsideMethods = toCopy.conditionalOutsideMethods;
+        this.equalityMatcher = toCopy.equalityMatcher;
         this.diffOnly = toCopy.diffOnly;
         this.consecutive = toCopy.consecutive;
         this.dumpMode = toCopy.dumpMode;
@@ -251,6 +258,13 @@ public class MergeContext implements Cloneable {
     public void configureFrom(JDimeConfig config) {
 
         setUseMCESubtreeMatcher(config.getBoolean(USE_MCESUBTREE_MATCHER).orElse(false));
+
+
+        if (config.getBoolean(CLI_NOEQUALITYMATCHER).orElse(false)) {
+            setEqualityMatcherEnabled(false);
+        } else {
+            setEqualityMatcherEnabled(true);
+        }
 
         config.getBoolean(CLI_DIFFONLY).ifPresent(diffOnly -> {
             setDiffOnly(diffOnly);
@@ -499,6 +513,24 @@ public class MergeContext implements Cloneable {
      */
     public boolean hasOutput() {
         return stdIn.getBuffer().length() != 0;
+    }
+
+    /**
+     * Returns true if EqualityMatcher is enabled.
+     *
+     * @return true if EqualityMatcher is enabled
+     */
+    public boolean isEqualityMatcherEnabled() {
+        return equalityMatcher;
+    }
+
+    /**
+     * Enable or disable EqualityMatcher.
+     *
+     * @param enabled true if EqualityMatcher should be used
+     */
+    public void setEqualityMatcherEnabled(boolean enabled) {
+        this.equalityMatcher = enabled;
     }
 
     /**
