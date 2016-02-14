@@ -127,11 +127,13 @@ public class Matcher<T extends Artifact<T>> {
      * @return <code>Matchings</code> of the two nodes
      */
     public Matchings<T> match(MergeContext context, T left, T right, Color color) {
-        trivialMatches.clear();
+        if (context.isEqualityMatcherEnabled()) {
+            trivialMatches.clear();
 
-        Matchings<T> trivialMatches = new EqualityMatcher<T>(null).match(context, left, right);
-        trivialMatches.forEach(m -> this.trivialMatches.put(m.getMatchedArtifacts(), m));
+            Matchings<T> trivialMatches = new EqualityMatcher<T>(null).match(context, left, right);
+            trivialMatches.forEach(m -> this.trivialMatches.put(m.getMatchedArtifacts(), m));
 
+        }
         Matchings<T> matchings = match(context, left, right);
         Matching<T> matching = matchings.get(left, right).get();
 
