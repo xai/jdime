@@ -49,6 +49,7 @@ public class Matching<T extends Artifact<T>> implements Cloneable, Comparable<Ma
     private float percentage;
     private int score;
     private boolean fullyMatched;
+    private long runtime;
 
     /**
      * Constructs a new <code>Matching</code> between the two given <code>T</code>s.
@@ -89,6 +90,7 @@ public class Matching<T extends Artifact<T>> implements Cloneable, Comparable<Ma
         this.matchedArtifacts = UnorderedTuple.of(toCopy.matchedArtifacts.getX(), toCopy.matchedArtifacts.getY());
         this.percentage = toCopy.percentage;
         this.score = toCopy.score;
+        this.runtime = toCopy.runtime;
     }
 
     /**
@@ -226,6 +228,24 @@ public class Matching<T extends Artifact<T>> implements Cloneable, Comparable<Ma
      */
     public void setAlgorithm(String algorithm) {
         this.algorithm = algorithm;
+    }
+
+    /**
+     * Set runtime for matching in milliseconds.
+     *
+     * @param milliseconds runtime
+     */
+    public void setRuntime(long milliseconds) {
+        this.runtime = milliseconds;
+    }
+
+    /**
+     * Returns runtime for matching in millisecons.
+     *
+     * @return runtime in millisecons
+     */
+    public long getRuntime() {
+        return runtime;
     }
 
     /**

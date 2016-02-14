@@ -62,6 +62,8 @@ public class SimpleTreeMatcher<T extends Artifact<T>> extends OrderedMatcher<T> 
      */
     @Override
     public Matchings<T> match(MergeContext context, T left, T right) {
+        long start = System.currentTimeMillis();
+
         int rootMatching = left.matches(right) ? 1 : 0;
 
         // number of first-level subtrees of t1
@@ -139,6 +141,7 @@ public class SimpleTreeMatcher<T extends Artifact<T>> extends OrderedMatcher<T> 
 
         // total matching score for these trees is the score of the matched children + the matching of the root nodes
         Matching<T> matching = new Matching<>(left, right, matrixM[m][n] + rootMatching);
+        matching.setRuntime(System.currentTimeMillis() - start);
         matching.setAlgorithm(ID);
 
         Matchings<T> matchings = new Matchings<>();

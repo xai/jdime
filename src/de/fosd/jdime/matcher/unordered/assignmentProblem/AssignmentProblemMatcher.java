@@ -60,6 +60,8 @@ public abstract class AssignmentProblemMatcher<T extends Artifact<T>> extends Un
      */
     @Override
     public final Matchings<T> match(final MergeContext context, final T left, final T right) {
+        long start = System.currentTimeMillis();
+
         int rootMatching = left.matches(right) ? 1 : 0;
 
         // number of first-level subtrees of t1
@@ -70,7 +72,9 @@ public abstract class AssignmentProblemMatcher<T extends Artifact<T>> extends Un
 
         if (m == 0 || n == 0) {
             Matchings<T> matchings = Matchings.of(left, right, rootMatching);
-            matchings.get(left, right).get().setAlgorithm(ID);
+            Matching<T> matching =  matchings.get(left, right).get();
+            matching.setRuntime(System.currentTimeMillis());
+            matching.setAlgorithm(ID);
 
             return matchings;
         }

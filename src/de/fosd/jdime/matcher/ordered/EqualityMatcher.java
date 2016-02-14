@@ -62,6 +62,8 @@ public class EqualityMatcher<T extends Artifact<T>> extends OrderedMatcher<T> {
 
     @Override
     public Matchings<T> match(MergeContext context, T left, T right) {
+        long start = System.currentTimeMillis();
+
         Matchings<T> matchings = new Matchings<>();
 
         Iterator<T> lIt = left.getChildren().iterator();
@@ -86,7 +88,9 @@ public class EqualityMatcher<T extends Artifact<T>> extends OrderedMatcher<T> {
                 return String.format(format, ID, left.getId(), right.getId());
             });
 
-            matchings.add(new Matching<>(left, right, sumScore + 1));
+            Matching<T> matching = new Matching<>(left, right, sumScore + 1);
+            matching.setRuntime(System.currentTimeMillis() - start);
+            matchings.add(matching);
         } else {
 
             LOG.finer(() -> {

@@ -64,6 +64,8 @@ public class HungarianMatcher<T extends Artifact<T>> extends AssignmentProblemMa
      */
     @Override
     protected Matchings<T> solveAssignmentProblem(T left, T right, Tuple<Integer, Matchings<T>>[][] childrenMatching, int rootMatching) {
+        long start = System.currentTimeMillis();
+
         int m = childrenMatching.length;
         int n = childrenMatching[0].length;
         int[][] matrix = new int[m][n];
@@ -110,6 +112,7 @@ public class HungarianMatcher<T extends Artifact<T>> extends AssignmentProblemMa
         }
 
         Matching<T> matching = new Matching<>(left, right, score + rootMatching);
+        matching.setRuntime(System.currentTimeMillis() - start);
         matching.setAlgorithm(ID);
 
         Matchings<T> result = new Matchings<>();
