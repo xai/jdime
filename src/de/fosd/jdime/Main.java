@@ -496,7 +496,16 @@ public final class Main {
      * @param number number of the AST element that should be inspected
      */
     private static void inspectElement(FileArtifact artifact, int number) {
-        System.out.println(((ASTNodeArtifact) new ASTNodeArtifact(artifact).find("null:" + number)).inspect());
+        try {
+            System.out.println(((ASTNodeArtifact) new ASTNodeArtifact(artifact).find("null:" + number)).inspect());
+        } catch (Error extendJWTF) {
+            LOG.warning(extendJWTF.getMessage());
+            if (number > 1) {
+                inspectElement(artifact, number - 1);
+            } else {
+                throw new RuntimeException("I am a bug. Please fix me!");
+            }
+        }
     }
 
     /**
