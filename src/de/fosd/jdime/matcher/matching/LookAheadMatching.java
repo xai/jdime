@@ -36,6 +36,7 @@ public class LookAheadMatching<T extends Artifact<T>> extends Matching<T> {
         super(realMatching.getLeft(), realMatching.getRight(), realMatching.getScore());
         this.lookAheadFrom = UnorderedTuple.of(lookAheadLeft, lookAheadRight);
         this.setAlgorithm(realMatching.getAlgorithm());
+        this.setRuntime(realMatching.getRuntime());
     }
 
     @Override
