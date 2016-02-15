@@ -327,7 +327,8 @@ public class MergeContext implements Cloneable {
             ArtifactList<FileArtifact> inputArtifacts = new ArtifactList<>();
             char cond = 'A';
 
-            for (String fileName : paths) {
+            for (String name : paths) {
+                String fileName = name.trim();
 
                 try {
                     FileArtifact newArtifact = new FileArtifact(new File(fileName));
