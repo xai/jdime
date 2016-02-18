@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import de.fosd.jdime.stats.KeyEnums;
 import de.fosd.jdime.strdump.DumpMode;
 import de.uni_passau.fim.seibt.kvconfig.sources.ConfigSource;
 import org.apache.commons.cli.CommandLine;
@@ -170,6 +171,18 @@ public class CommandLineConfigSource extends ConfigSource {
                 .build();
 
         options.addOption(o);
+
+        for (KeyEnums.Type type : KeyEnums.Type.values()) {
+            o = Option.builder(CLI_LOOKAHEAD + type.name().toLowerCase())
+                    .longOpt("lookahead-" + type.name().toLowerCase())
+                    .desc("Use heuristics for matching elements of type " + type.name().toLowerCase()
+                            + ". Supply off, full, or a number as argument.")
+                    .hasArg()
+                    .argName("level")
+                    .build();
+
+            options.addOption(o);
+        }
 
         o = Option.builder(CLI_INSPECT)
                 .longOpt("inspect")

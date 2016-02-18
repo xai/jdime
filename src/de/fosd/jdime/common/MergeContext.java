@@ -300,7 +300,21 @@ public class MergeContext implements Cloneable {
         }).ifPresent(this::setLookAhead);
 
         for (KeyEnums.Type type : KeyEnums.Type.values()) {
-            Optional<Integer> lah = config.getInteger(JDimeConfig.LOOKAHEAD_PREFIX + type.name());
+            Optional<Integer> lah = config.get(CLI_LOOKAHEAD + type.name().toLowerCase(), val -> {
+                try {
+                    return Optional.of(Integer.parseInt(val));
+                } catch (NumberFormatException e) {
+
+                    if ("off".equals(val)) {
+                        return Optional.of(MergeContext.LOOKAHEAD_OFF);
+                    } else if ("full".equals(val)) {
+                        return Optional.of(MergeContext.LOOKAHEAD_FULL);
+                    } else {
+                        return Optional.empty();
+                    }
+                }
+            });
+
             lah.ifPresent(val -> setLookAhead(type, val));
         }
 
