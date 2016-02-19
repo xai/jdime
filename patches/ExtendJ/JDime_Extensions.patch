@@ -64,7 +64,7 @@ index 83488da..20a5ef4 100644
  
 diff --git a/java4/frontend/JDime.jadd b/java4/frontend/JDime.jadd
 new file mode 100644
-index 0000000..db4beb4
+index 0000000..ef61ef0
 --- /dev/null
 +++ b/java4/frontend/JDime.jadd
 @@ -0,0 +1,180 @@
@@ -211,7 +211,7 @@ index 0000000..db4beb4
 +	}
 +
 +	public String MethodDecl.getMatchingRepresentation() {
-+		return dumpString() + " [" + getTypeAccess().prettyPrint() + "]";
++		return dumpString(); // + " [" + getTypeAccess().prettyPrint() + "]";
 +	}
 +
 +	public String VariableDecl.getMatchingRepresentation() {
