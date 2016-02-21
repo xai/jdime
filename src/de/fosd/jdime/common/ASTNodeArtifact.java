@@ -23,6 +23,8 @@
  */
 package de.fosd.jdime.common;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -35,6 +37,8 @@ import de.fosd.jdime.common.operations.MergeOperation;
 import de.fosd.jdime.common.operations.Operation;
 import de.fosd.jdime.merge.Merge;
 import de.fosd.jdime.stats.KeyEnums;
+import de.fosd.jdime.strategy.LinebasedStrategy;
+import de.fosd.jdime.strdump.DumpMode;
 import org.jastadd.extendj.ast.ASTNode;
 import org.jastadd.extendj.ast.BytecodeParser;
 import org.jastadd.extendj.ast.BytecodeReader;
@@ -145,6 +149,13 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
                 }
             }
         }
+
+        if (isMethod()) {
+            String content = astnode.prettyPrint();
+            astnode.getChild(4).content = content;
+
+        }
+
         setChildren(children);
         initialized = true;
     }
@@ -202,6 +213,7 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
             clone.setRevision(getRevision());
             clone.setNumber(getNumber());
             clone.cloneMatches(this);
+            clone.astnode.content = astnode.content;
 
             ArtifactList<ASTNodeArtifact> cloneChildren = new ArtifactList<>();
             for (ASTNodeArtifact child : children) {
@@ -353,6 +365,9 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
     @Override
     public final boolean isLeaf() {
         // TODO Auto-generated method stub
+        if (astnode != null && astnode.isContent()) {
+            return true;
+        }
         return false;
     }
 
@@ -387,6 +402,10 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
                     other.astnode.getMatchingRepresentation());
         });
 
+        if (astnode.isContent() && other.astnode.isContent()) {
+            return true;
+        }
+
         return astnode.matches(other.astnode);
     }
 
@@ -401,6 +420,54 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
         ASTNodeArtifact target = operation.getTarget();
 
         boolean safeMerge = true;
+
+        if (left.isLeaf() && right.isLeaf()) {
+            // perform semistructured merge
+
+            ASTNodeArtifact base = triple.getBase();
+            try {
+                File leftContent = File.createTempFile("left", ".java");
+                File baseContent = File.createTempFile("base", ".java");
+                File rightContent = File.createTempFile("right", ".java");
+                File mergeContent = File.createTempFile("merge", ".java");
+                leftContent.deleteOnExit();
+                baseContent.deleteOnExit();
+                rightContent.deleteOnExit();
+                mergeContent.deleteOnExit();
+
+                FileWriter fw = new FileWriter(leftContent);
+                fw.write(left.astnode.content);
+                fw.close();
+
+                if (base != null && base.astnode != null && base.isLeaf()) {
+                    fw = new FileWriter(baseContent);
+                    fw.write(base.astnode.content);
+                    fw.close();
+                }
+
+                fw = new FileWriter(rightContent);
+                fw.write(right.astnode.content);
+                fw.close();
+
+                ArtifactList input = new ArtifactList();
+                input.add(new FileArtifact(leftContent));
+                input.add(new FileArtifact(baseContent));
+                input.add(new FileArtifact(rightContent));
+
+                FileArtifact targetContent = new FileArtifact(mergeContent);
+                MergeContext semiContext = new MergeContext();
+                semiContext.setPretend(false);
+
+                LinebasedStrategy lbs = new LinebasedStrategy();
+                lbs.merge(new MergeOperation<FileArtifact>(input, targetContent, null, null, false), semiContext);
+                target.astnode.content = targetContent.getContent();
+
+                return;
+
+            } catch (IOException e) {
+                throw new RuntimeException("Could not perform semistructured merge.");
+            }
+        }
 
         int numChildNoTransform;
         try {
@@ -557,7 +624,7 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
             }
         }
 
-        if (!isConflict() && getNumChildren() != astnode.getNumChildNoTransform()) {
+        if (!isConflict() && !astnode.isContent() && getNumChildren() != astnode.getNumChildNoTransform()) {
             throw new RuntimeException("Mismatch of getNumChildren() and astnode.getNumChildren()---" +
                     "This is either a bug in ExtendJ or in JDime!");
         }
