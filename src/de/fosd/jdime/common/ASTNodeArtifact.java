@@ -152,8 +152,11 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
 
         if (isMethod()) {
             String content = astnode.prettyPrint();
-            astnode.getChild(4).content = content;
-
+            if (astnode instanceof MethodDecl) {
+                ((MethodDecl) astnode).getBlockOpt().content = content;
+            } else if (astnode instanceof ConstructorDecl) {
+                ((ConstructorDecl) astnode).getBlock().content = content;
+            }
         }
 
         setChildren(children);
