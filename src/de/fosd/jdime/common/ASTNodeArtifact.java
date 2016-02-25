@@ -64,6 +64,12 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
     private boolean initialized = false;
 
     /**
+     * Whether to use semistructured merge. This implies treating everything below
+     * method declarations as plain text.
+     */
+    private boolean semistructured = false;
+
+    /**
      * Initializes parser.
      *
      * @param p
@@ -150,7 +156,12 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
             }
         }
 
-        if (isMethod()) {
+        if (semistructured && isMethod()) {
+            /*
+             * Everything below this node should be treated as plain text.
+             * Therefore, a specific content property is used that should be evaluated
+             * instead of the child nodes.
+             */
             String content = astnode.prettyPrint();
             if (astnode instanceof MethodDecl) {
                 ((MethodDecl) astnode).getBlockOpt().content = content;
@@ -170,6 +181,18 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
      *            file artifact
      */
     public ASTNodeArtifact(FileArtifact artifact) {
+        this(artifact, false);
+    }
+
+    /**
+     * Constructs an ASTNodeArtifact from a FileArtifact.
+     *
+     * @param artifact
+     *            file artifact
+     * @param semistructured
+     *            treat content of method as text
+     */
+    public ASTNodeArtifact(FileArtifact artifact, boolean semistructured) {
         assert (artifact != null);
 
         setRevision(artifact.getRevision());
@@ -423,7 +446,7 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
         ASTNodeArtifact right = triple.getRight();
         ASTNodeArtifact target = operation.getTarget();
 
-        if (left.isLeaf() && right.isLeaf()) {
+        if (context.isSemistructured() && left.isLeaf() && right.isLeaf()) {
             mergeContent(left, base, right, target);
             return;
         }
@@ -670,5 +693,27 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
         choice.setNumber(virtualcount++);
         choice.setChoice(condition, artifact);
         return choice;
+    }
+
+    /**
+     * Returns whether to use a semistructured merge approach.
+     *
+     * When enabled, everything below method declarations is treated as plain text and merged via
+     * a linebased strategy.
+     */
+    public boolean isSemistructured() {
+        return semistructured;
+    }
+
+    /**
+     * Sets whether to use a semistructured merge approach.
+     *
+     * When enabled, everything below method declarations is treated as plain text and merged via
+     * a linebased strategy.
+     *
+     * @param semistructured use semistructured merge
+     */
+    public void setSemistructured(boolean semistructured) {
+        this.semistructured = semistructured;
     }
 }

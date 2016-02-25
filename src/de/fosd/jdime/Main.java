@@ -384,6 +384,10 @@ public final class Main {
 
                 try {
                     context.setMergeStrategy(MergeStrategy.parse(mode.get()));
+
+                    if (MergeStrategy.SEMISTRUCTURED.equals(mode.get().toLowerCase())) {
+                        context.setSemistructured(true);
+                    }
                 } catch (StrategyNotFoundException e) {
                     LOG.log(Level.SEVERE, e, () -> "Strategy not found.");
                     return false;

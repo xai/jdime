@@ -118,9 +118,9 @@ public class StructuredStrategy extends MergeStrategy<FileArtifact> {
         try {
             long startTime = System.currentTimeMillis();
 
-            ASTNodeArtifact left = new ASTNodeArtifact(leftFile);
-            ASTNodeArtifact base = new ASTNodeArtifact(baseFile);
-            ASTNodeArtifact right = new ASTNodeArtifact(rightFile);
+            ASTNodeArtifact left = new ASTNodeArtifact(leftFile, context.isSemistructured());
+            ASTNodeArtifact base = new ASTNodeArtifact(baseFile, context.isSemistructured());
+            ASTNodeArtifact right = new ASTNodeArtifact(rightFile, context.isSemistructured());
 
             ASTNodeArtifact targetNode = ASTNodeArtifact.createProgram(left);
             targetNode.setRevision(left.getRevision());

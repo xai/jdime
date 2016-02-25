@@ -165,6 +165,12 @@ public class MergeContext implements Cloneable {
     private Map<MergeScenario<?>, Throwable> crashes;
 
     /**
+     * Whether to use semistructured merge. This implies treating everything below
+     * method declarations as plain text.
+     */
+    private boolean semistructured;
+
+    /**
      * Constructs a new <code>MergeContext</code> initializing all options to their default values.
      */
     public MergeContext() {
@@ -185,6 +191,7 @@ public class MergeContext implements Cloneable {
         this.collectStatistics = false;
         this.statistics = null;
         this.useMCESubtreeMatcher = false;
+        this.semistructured = false;
         this.stdErr = new StringWriter();
         this.stdIn = new StringWriter();
         this.lookAhead = MergeContext.LOOKAHEAD_OFF;
@@ -218,6 +225,7 @@ public class MergeContext implements Cloneable {
         this.collectStatistics = toCopy.collectStatistics;
         this.statistics = (toCopy.statistics != null) ? new Statistics(toCopy.statistics) : null;
         this.useMCESubtreeMatcher = toCopy.useMCESubtreeMatcher;
+        this.semistructured = toCopy.semistructured;
 
         this.stdErr = new StringWriter();
         this.stdErr.append(toCopy.stdErr.toString());
@@ -804,5 +812,27 @@ public class MergeContext implements Cloneable {
      */
     public void setUseMCESubtreeMatcher(boolean useMCESubtreeMatcher) {
         this.useMCESubtreeMatcher = useMCESubtreeMatcher;
+    }
+
+    /**
+     * Returns whether to use a semistructured merge approach.
+     *
+     * When enabled, everything below method declarations is treated as plain text and merged via
+     * a linebased strategy.
+     */
+    public boolean isSemistructured() {
+        return semistructured;
+    }
+
+    /**
+     * Sets whether to use a semistructured merge approach.
+     *
+     * When enabled, everything below method declarations is treated as plain text and merged via
+     * a linebased strategy.
+     *
+     * @param semistructured use semistructured merge
+     */
+    public void setSemistructured(boolean semistructured) {
+        this.semistructured = semistructured;
     }
 }

@@ -170,7 +170,7 @@ public class CommandLineConfigSource extends ConfigSource {
 
         o = Option.builder(CLI_MODE)
                 .longOpt("mode")
-                .desc("Set the mode to one of (unstructured, structured, autotuning, dumptree, dumpgraph, dumpfile, " +
+                .desc("Set the mode to one of (unstructured, semistructured, structured, autotuning, dumptree, dumpgraph, dumpfile, " +
                         "prettyprint, nway)")
                 .hasArg()
                 .argName("mode")

@@ -49,6 +49,7 @@ public abstract class MergeStrategy<T extends Artifact<T>> implements MergeInter
 
     public static final String LINEBASED = "linebased";
     public static final String UNSTRUCTURED = "unstructured";
+    public static final String SEMISTRUCTURED = "semistructured";
     public static final String STRUCTURED = "structured";
     public static final String COMBINED = "combined";
     public static final String AUTOTUNING = "autotuning";
@@ -64,6 +65,7 @@ public abstract class MergeStrategy<T extends Artifact<T>> implements MergeInter
 
         entries.put(LINEBASED, lineBased);
         entries.put(UNSTRUCTURED, lineBased);
+        entries.put(SEMISTRUCTURED, structured);
         entries.put(STRUCTURED, structured);
         entries.put(COMBINED, combined);
         entries.put(AUTOTUNING, combined);
