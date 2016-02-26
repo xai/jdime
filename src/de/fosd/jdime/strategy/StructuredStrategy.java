@@ -123,6 +123,7 @@ public class StructuredStrategy extends MergeStrategy<FileArtifact> {
             ASTNodeArtifact right = new ASTNodeArtifact(rightFile, context.isSemistructured());
 
             ASTNodeArtifact targetNode = ASTNodeArtifact.createProgram(left);
+            targetNode.setSemistructured(context.isSemistructured());
             targetNode.setRevision(left.getRevision());
             targetNode.renumberTree();
 

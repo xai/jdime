@@ -112,7 +112,7 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
             program = new Program();
         }
 
-        ASTNodeArtifact p = new ASTNodeArtifact(program, null);
+        ASTNodeArtifact p = new ASTNodeArtifact(program, null, false);
         p.deleteChildren();
 
         return p;
@@ -131,12 +131,9 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
         this.initializeChildren();
     }
 
-    /**
-     * @param astnode
-     *            astnode
-     */
-    private ASTNodeArtifact(final ASTNode<?> astnode, Revision revision) {
+    private ASTNodeArtifact(final ASTNode<?> astnode, Revision revision, boolean semistructured) {
         assert (astnode != null);
+        this.semistructured = semistructured;
         this.astnode = astnode;
         setRevision(revision);
         initializeChildren();
@@ -146,7 +143,7 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
         ArtifactList<ASTNodeArtifact> children = new ArtifactList<>();
         for (int i = 0; i < astnode.getNumChild(); i++) {
             if (astnode != null) {
-                ASTNodeArtifact child = new ASTNodeArtifact(astnode.getChild(i), getRevision());
+                ASTNodeArtifact child = new ASTNodeArtifact(astnode.getChild(i), getRevision(), semistructured);
                 child.setParent(this);
                 child.setRevision(getRevision());
                 children.add(child);
@@ -195,6 +192,7 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
     public ASTNodeArtifact(FileArtifact artifact, boolean semistructured) {
         assert (artifact != null);
 
+        this.semistructured = semistructured;
         setRevision(artifact.getRevision());
 
         ASTNode<?> astnode;
@@ -235,10 +233,11 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
         ASTNodeArtifact clone = null;
 
         try {
-            clone = new ASTNodeArtifact(astnode.clone(), getRevision());
+            clone = new ASTNodeArtifact(astnode.clone(), getRevision(), semistructured);
             clone.setRevision(getRevision());
             clone.setNumber(getNumber());
             clone.cloneMatches(this);
+            clone.semistructured = semistructured;
             clone.astnode.content = astnode.content;
 
             ArtifactList<ASTNodeArtifact> cloneChildren = new ArtifactList<>();
@@ -673,8 +672,8 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
     @Override
     public final ASTNodeArtifact createConflictArtifact(final ASTNodeArtifact left, final ASTNodeArtifact right) {
         ASTNodeArtifact conflict = left != null
-                ? new ASTNodeArtifact(left.astnode.treeCopyNoTransform(), null)
-                : new ASTNodeArtifact(right.astnode.treeCopyNoTransform(), null);
+                ? new ASTNodeArtifact(left.astnode.treeCopyNoTransform(), null, semistructured)
+                : new ASTNodeArtifact(right.astnode.treeCopyNoTransform(), null, semistructured);
 
         conflict.setRevision(MergeScenario.CONFLICT);
         conflict.setNumber(virtualcount++);
@@ -688,7 +687,7 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
         LOG.fine("Creating choice node");
         ASTNodeArtifact choice;
 
-        choice = new ASTNodeArtifact(artifact.astnode.treeCopyNoTransform(), null);
+        choice = new ASTNodeArtifact(artifact.astnode.treeCopyNoTransform(), null, semistructured);
         choice.setRevision(MergeScenario.CHOICE);
         choice.setNumber(virtualcount++);
         choice.setChoice(condition, artifact);
