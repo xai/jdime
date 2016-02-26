@@ -1,9 +1,5 @@
 sudo: required
 
-branches:
-    except:
-        - feature/semistructured
-
 dist: trusty
 
 language: java
