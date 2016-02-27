@@ -112,9 +112,32 @@ public class OrderedMerge<T extends Artifact<T>> implements MergeInterface<T> {
                         if (LOG.isLoggable(Level.FINEST)) {
                             LOG.finest(prefix(leftChild) + "has changes in subtree.");
                         }
-                        ConflictOperation<T> conflictOp = new ConflictOperation<>(
-                                leftChild, rightChild, target, l.getName(), r.getName());
-                        conflictOp.apply(context);
+                        if (leftChild.isLeaf() && rightChild.isLeaf()) {
+                            // These are content nodes that can still be merged
+
+                            Matching<T> mBase = leftChild.getMatching(b);
+                            MergeType childType = mBase == null ? MergeType.TWOWAY
+                                    : MergeType.THREEWAY;
+                            T baseChild = mBase == null ? leftChild.createEmptyArtifact()
+                                    : mBase.getMatchingArtifact(leftChild);
+                            T targetChild = target == null ? null : target.addChild(leftChild.clone());
+                            if (targetChild != null) {
+                                assert targetChild.exists();
+                                targetChild.deleteChildren();
+                            }
+
+                            MergeScenario<T> childTriple = new MergeScenario<>(childType,
+                                    leftChild, baseChild, rightChild);
+
+                            MergeOperation<T> mergeOp = new MergeOperation<>(childTriple, targetChild, l.getName(), r.getName());
+                            leftChild.setMerged();
+                            rightChild.setMerged();
+                            mergeOp.apply(context);
+                        } else {
+                            ConflictOperation<T> conflictOp = new ConflictOperation<>(
+                                    leftChild, rightChild, target, l.getName(), r.getName());
+                            conflictOp.apply(context);
+                        }
                         if (rightIt.hasNext()) {
                             rightChild = rightIt.next();
                         } else {
@@ -146,9 +169,32 @@ public class OrderedMerge<T extends Artifact<T>> implements MergeInterface<T> {
                                 LOG.finest(() -> String.format("%s has changes in subtree.", prefix(finalRightChild)));
 
                                 // deletion-insertion conflict
-                                ConflictOperation<T> conflictOp = new ConflictOperation<>(
-                                        leftChild, rightChild, target, l.getName(), r.getName());
-                                conflictOp.apply(context);
+                                if (leftChild.isLeaf() && rightChild.isLeaf()) {
+                                    // These are content nodes that can still be merged
+
+                                    Matching<T> mBase = leftChild.getMatching(b);
+                                    MergeType childType = mBase == null ? MergeType.TWOWAY
+                                            : MergeType.THREEWAY;
+                                    T baseChild = mBase == null ? leftChild.createEmptyArtifact()
+                                            : mBase.getMatchingArtifact(leftChild);
+                                    T targetChild = target == null ? null : target.addChild(leftChild.clone());
+                                    if (targetChild != null) {
+                                        assert targetChild.exists();
+                                        targetChild.deleteChildren();
+                                    }
+
+                                    MergeScenario<T> childTriple = new MergeScenario<>(childType,
+                                            leftChild, baseChild, rightChild);
+
+                                    MergeOperation<T> mergeOp = new MergeOperation<>(childTriple, targetChild, l.getName(), r.getName());
+                                    leftChild.setMerged();
+                                    rightChild.setMerged();
+                                    mergeOp.apply(context);
+                                } else {
+                                    ConflictOperation<T> conflictOp = new ConflictOperation<>(
+                                            leftChild, rightChild, target, l.getName(), r.getName());
+                                    conflictOp.apply(context);
+                                }
                                 if (rightIt.hasNext()) {
                                     rightChild = rightIt.next();
                                 } else {
@@ -169,9 +215,32 @@ public class OrderedMerge<T extends Artifact<T>> implements MergeInterface<T> {
                             LOG.finest(() -> String.format("%s is a change", prefix(finalRightChild)));
 
                             // rightChild is a change
-                            ConflictOperation<T> conflictOp = new ConflictOperation<>(
-                                    leftChild, rightChild, target, l.getName(), r.getName());
-                            conflictOp.apply(context);
+                            if (leftChild.isLeaf() && rightChild.isLeaf()) {
+                                // These are content nodes that can still be merged
+
+                                Matching<T> mBase = leftChild.getMatching(b);
+                                MergeType childType = mBase == null ? MergeType.TWOWAY
+                                        : MergeType.THREEWAY;
+                                T baseChild = mBase == null ? leftChild.createEmptyArtifact()
+                                        : mBase.getMatchingArtifact(leftChild);
+                                T targetChild = target == null ? null : target.addChild(leftChild.clone());
+                                if (targetChild != null) {
+                                    assert targetChild.exists();
+                                    targetChild.deleteChildren();
+                                }
+
+                                MergeScenario<T> childTriple = new MergeScenario<>(childType,
+                                        leftChild, baseChild, rightChild);
+
+                                MergeOperation<T> mergeOp = new MergeOperation<>(childTriple, targetChild, l.getName(), r.getName());
+                                leftChild.setMerged();
+                                rightChild.setMerged();
+                                mergeOp.apply(context);
+                            } else {
+                                ConflictOperation<T> conflictOp = new ConflictOperation<>(
+                                        leftChild, rightChild, target, l.getName(), r.getName());
+                                conflictOp.apply(context);
+                            }
 
                             if (rightIt.hasNext()) {
                                 rightChild = rightIt.next();
@@ -211,9 +280,32 @@ public class OrderedMerge<T extends Artifact<T>> implements MergeInterface<T> {
                         LOG.finest(() -> String.format("%s has changes in subtree.", prefix(finalRightChild)));
 
                         // insertion-deletion-conflict
-                        ConflictOperation<T> conflictOp = new ConflictOperation<>(
-                                leftChild, rightChild, target, l.getName(), r.getName());
-                        conflictOp.apply(context);
+                        if (leftChild.isLeaf() && rightChild.isLeaf()) {
+                            // These are content nodes that can still be merged
+
+                            Matching<T> mBase = leftChild.getMatching(b);
+                            MergeType childType = mBase == null ? MergeType.TWOWAY
+                                    : MergeType.THREEWAY;
+                            T baseChild = mBase == null ? leftChild.createEmptyArtifact()
+                                    : mBase.getMatchingArtifact(leftChild);
+                            T targetChild = target == null ? null : target.addChild(leftChild.clone());
+                            if (targetChild != null) {
+                                assert targetChild.exists();
+                                targetChild.deleteChildren();
+                            }
+
+                            MergeScenario<T> childTriple = new MergeScenario<>(childType,
+                                    leftChild, baseChild, rightChild);
+
+                            MergeOperation<T> mergeOp = new MergeOperation<>(childTriple, targetChild, l.getName(), r.getName());
+                            leftChild.setMerged();
+                            rightChild.setMerged();
+                            mergeOp.apply(context);
+                        } else {
+                            ConflictOperation<T> conflictOp = new ConflictOperation<>(
+                                    leftChild, rightChild, target, l.getName(), r.getName());
+                            conflictOp.apply(context);
+                        }
                         if (rightIt.hasNext()) {
                             rightChild = rightIt.next();
                         } else {
@@ -269,9 +361,32 @@ public class OrderedMerge<T extends Artifact<T>> implements MergeInterface<T> {
                             LOG.finest(() -> String.format("%s is a change", prefix(finalLeftChild)));
 
                             // leftChild is a change
-                            ConflictOperation<T> conflictOp = new ConflictOperation<>(
-                                    leftChild, rightChild, target, l.getName(), r.getName());
-                            conflictOp.apply(context);
+                            if (leftChild.isLeaf() && rightChild.isLeaf()) {
+                                // These are content nodes that can still be merged
+
+                                Matching<T> mBase = leftChild.getMatching(b);
+                                MergeType childType = mBase == null ? MergeType.TWOWAY
+                                        : MergeType.THREEWAY;
+                                T baseChild = mBase == null ? leftChild.createEmptyArtifact()
+                                        : mBase.getMatchingArtifact(leftChild);
+                                T targetChild = target == null ? null : target.addChild(leftChild.clone());
+                                if (targetChild != null) {
+                                    assert targetChild.exists();
+                                    targetChild.deleteChildren();
+                                }
+
+                                MergeScenario<T> childTriple = new MergeScenario<>(childType,
+                                        leftChild, baseChild, rightChild);
+
+                                MergeOperation<T> mergeOp = new MergeOperation<>(childTriple, targetChild, l.getName(), r.getName());
+                                leftChild.setMerged();
+                                rightChild.setMerged();
+                                mergeOp.apply(context);
+                            } else {
+                                ConflictOperation<T> conflictOp = new ConflictOperation<>(
+                                        leftChild, rightChild, target, l.getName(), r.getName());
+                                conflictOp.apply(context);
+                            }
 
                             if (leftIt.hasNext()) {
                                 leftChild = leftIt.next();

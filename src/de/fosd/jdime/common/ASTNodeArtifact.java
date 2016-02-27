@@ -428,7 +428,7 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
         });
 
         if (astnode.isContent() && other.astnode.isContent()) {
-            return true;
+            return astnode.content.equals(other.astnode.content);
         }
 
         return astnode.matches(other.astnode);
