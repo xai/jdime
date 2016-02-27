@@ -528,44 +528,48 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
      * @param target artifact where output of merge is written
      */
     private void mergeContent(ASTNodeArtifact left, ASTNodeArtifact base, ASTNodeArtifact right, ASTNodeArtifact target) {
-        try {
-            File leftContent = File.createTempFile("left", ".java");
-            File baseContent = File.createTempFile("base", ".java");
-            File rightContent = File.createTempFile("right", ".java");
-            File mergeContent = File.createTempFile("merge", ".java");
-            leftContent.deleteOnExit();
-            baseContent.deleteOnExit();
-            rightContent.deleteOnExit();
-            mergeContent.deleteOnExit();
+        if (left.matches(right)) {
+            target.astnode.content = left.astnode.content;
+        } else {
+            try {
+                File leftContent = File.createTempFile("left", ".java");
+                File baseContent = File.createTempFile("base", ".java");
+                File rightContent = File.createTempFile("right", ".java");
+                File mergeContent = File.createTempFile("merge", ".java");
+                leftContent.deleteOnExit();
+                baseContent.deleteOnExit();
+                rightContent.deleteOnExit();
+                mergeContent.deleteOnExit();
 
-            FileWriter fw = new FileWriter(leftContent);
-            fw.write(left.astnode.content);
-            fw.close();
-
-            if (base != null && base.astnode != null && base.isLeaf()) {
-                fw = new FileWriter(baseContent);
-                fw.write(base.astnode.content);
+                FileWriter fw = new FileWriter(leftContent);
+                fw.write(left.astnode.content);
                 fw.close();
+
+                if (base != null && base.astnode != null && base.isLeaf()) {
+                    fw = new FileWriter(baseContent);
+                    fw.write(base.astnode.content);
+                    fw.close();
+                }
+
+                fw = new FileWriter(rightContent);
+                fw.write(right.astnode.content);
+                fw.close();
+
+                ArtifactList input = new ArtifactList();
+                input.add(new FileArtifact(leftContent));
+                input.add(new FileArtifact(baseContent));
+                input.add(new FileArtifact(rightContent));
+
+                FileArtifact targetContent = new FileArtifact(mergeContent);
+                MergeContext semiContext = new MergeContext();
+                semiContext.setPretend(false);
+
+                LinebasedStrategy lbs = new LinebasedStrategy();
+                lbs.merge(new MergeOperation<FileArtifact>(input, targetContent, null, null, false), semiContext);
+                target.astnode.content = targetContent.getContent();
+            } catch (IOException e) {
+                throw new RuntimeException("Could not perform semistructured merge.");
             }
-
-            fw = new FileWriter(rightContent);
-            fw.write(right.astnode.content);
-            fw.close();
-
-            ArtifactList input = new ArtifactList();
-            input.add(new FileArtifact(leftContent));
-            input.add(new FileArtifact(baseContent));
-            input.add(new FileArtifact(rightContent));
-
-            FileArtifact targetContent = new FileArtifact(mergeContent);
-            MergeContext semiContext = new MergeContext();
-            semiContext.setPretend(false);
-
-            LinebasedStrategy lbs = new LinebasedStrategy();
-            lbs.merge(new MergeOperation<FileArtifact>(input, targetContent, null, null, false), semiContext);
-            target.astnode.content = targetContent.getContent();
-        } catch (IOException e) {
-            throw new RuntimeException("Could not perform semistructured merge.");
         }
     }
 
