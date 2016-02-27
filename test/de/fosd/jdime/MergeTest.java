@@ -44,7 +44,7 @@ import static org.junit.Assert.fail;
  */
 public class MergeTest extends JDimeTest {
 
-    private static final String[] STRATEGIES = { "linebased", "structured", "combined" };
+    private static final String[] STRATEGIES = { "linebased", "structured", "combined", "semistructured" };
 
     private MergeContext context;
 
@@ -78,6 +78,11 @@ public class MergeTest extends JDimeTest {
 
             for (String strategy : STRATEGIES) {
                 context.setMergeStrategy(MergeStrategy.parse(strategy));
+
+                if (strategy.equals(MergeStrategy.SEMISTRUCTURED)) {
+                    context.setSemistructured(true);
+                }
+
                 context.setInputFiles(inputArtifacts);
 
                 File out = Files.createTempFile("jdime-tests", ".java").toFile();
