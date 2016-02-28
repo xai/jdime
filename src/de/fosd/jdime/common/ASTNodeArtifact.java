@@ -566,7 +566,7 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
 
                 LinebasedStrategy lbs = new LinebasedStrategy();
                 lbs.merge(new MergeOperation<FileArtifact>(input, targetContent, null, null, false), semiContext);
-                target.astnode.content = targetContent.getContent();
+                target.astnode.content = targetContent.getContent().trim();
             } catch (IOException e) {
                 throw new RuntimeException("Could not perform semistructured merge.");
             }
