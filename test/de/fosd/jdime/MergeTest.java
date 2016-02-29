@@ -162,4 +162,9 @@ public class MergeTest extends JDimeTest {
     public void testJDime93a3d27() throws Exception {
         runMerge("RealScenarios/JDime/93a3d27/StructuredStrategy.java");
     }
+
+    @Test
+    public void testJDime0138017() throws Exception {
+        runMerge("RealScenarios/JDime/0138017/Main.java");
+    }
 }
