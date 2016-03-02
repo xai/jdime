@@ -250,10 +250,12 @@ public class MergeScenarioStatistics {
      *
      * @param mergeResult
      *         the code to parse
+     * @param filterConflicts
+     *         if true, conflicts consisting only of whitespace or comments will be ignored
      * @return the <code>ParseResult</code> from {@link Parser#parse(String)}
      */
-    public ParseResult addLineStatistics(String mergeResult) {
-        ParseResult result = Parser.parse(mergeResult);
+    public ParseResult addLineStatistics(String mergeResult, boolean filterConflicts) {
+        ParseResult result = Parser.parse(mergeResult, filterConflicts);
 
         lineStatistics.incrementTotal(result.getLinesOfCode());
         lineStatistics.incrementNumOccurInConflic(result.getConflictingLinesOfCode());
@@ -268,10 +270,12 @@ public class MergeScenarioStatistics {
      *
      * @param mergeResult
      *         the code to parse
+     * @param filterConflicts
+     *         if true, conflicts consisting only of whitespace or comments will be ignored
      * @return the <code>ParseResult</code> from {@link Parser#parse(String)}
      */
-    public ParseResult setLineStatistics(String mergeResult) {
-        ParseResult result = Parser.parse(mergeResult);
+    public ParseResult setLineStatistics(String mergeResult, boolean filterConflicts) {
+        ParseResult result = Parser.parse(mergeResult, filterConflicts);
 
         lineStatistics.setTotal(result.getLinesOfCode());
         lineStatistics.setNumOccurInConflict(result.getConflictingLinesOfCode());

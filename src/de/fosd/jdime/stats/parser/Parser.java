@@ -48,13 +48,28 @@ public final class Parser {
 
     /**
      * Parses the given code to a list of {@link Content} objects and counts the merged and conflicting lines
-     * and the number of conflicts. Comments and conflicts consisting only of commented out lines will be ignored.
+     * and the number of conflicts. Comments and conflicts consisting only of commented out lines or whitespace
+     * will be ignored.
      *
      * @param code
      *         the piece of code to be parsed
      * @return the parse result
      */
     public static ParseResult parse(String code) {
+        return parse(code, true);
+    }
+
+    /**
+     * Parses the given code to a list of {@link Content} objects and counts the merged and conflicting lines
+     * and the number of conflicts.
+     *
+     * @param code
+     *         the piece of code to be parsed
+     * @param filterConflicts
+     *         if true, conflicts consisting only of whitespace or comments will be ignored
+     * @return the parse result
+     */
+    public static ParseResult parse(String code, boolean filterConflicts) {
         Scanner s = new Scanner(code);
         ParseResult res = new ParseResult();
 
@@ -98,7 +113,7 @@ public final class Parser {
 
                     wasConflictMarker = true;
                     inConflict = false;
-                    if (clocBeforeConflict == conflictingLinesOfCode) {
+                    if (filterConflicts && clocBeforeConflict == conflictingLinesOfCode) {
                         conflicts--; // the conflict only contained empty lines and comments
                     }
                 } else {

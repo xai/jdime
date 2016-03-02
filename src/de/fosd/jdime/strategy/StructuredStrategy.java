@@ -182,7 +182,7 @@ public class StructuredStrategy extends MergeStrategy<FileArtifact> {
                 MergeScenarioStatistics scenarioStatistics = new MergeScenarioStatistics(triple);
 
                 if (!context.isDiffOnly()) {
-                    ParseResult parseResult = scenarioStatistics.setLineStatistics(context.getStdIn());
+                    ParseResult parseResult = scenarioStatistics.setLineStatistics(context.getStdIn(), true);
 
                     if (parseResult.getConflicts() > 0) {
                         scenarioStatistics.getFileStatistics().incrementNumOccurInConflic();
