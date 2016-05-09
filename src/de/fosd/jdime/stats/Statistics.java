@@ -74,7 +74,6 @@ public class Statistics {
         serializer.useAttributeFor(Revision.class, "name");
 
         serializer.alias(Statistics.class.getSimpleName().toLowerCase(), Statistics.class);
-        serializer.omitField(Statistics.class, "currentFileMergeScenario");
         serializer.addImplicitMap(Statistics.class, "scenarioStatistics", MergeScenarioStatistics.class, "mergeScenario");
 
         serializer.alias(KeyEnums.Type.class.getSimpleName().toLowerCase(), KeyEnums.Type.class);
