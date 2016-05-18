@@ -41,6 +41,7 @@ import java.util.stream.Stream;
 
 import de.fosd.jdime.common.ASTNodeArtifact;
 import de.fosd.jdime.common.AbortException;
+import de.fosd.jdime.common.Artifact;
 import de.fosd.jdime.common.ArtifactList;
 import de.fosd.jdime.common.FileArtifact;
 import de.fosd.jdime.common.MergeContext;
@@ -444,7 +445,7 @@ public final class Main {
             return;
         }
 
-        if (mode == DumpMode.FILE_DUMP) {
+        if (mode == DumpMode.FILE_DUMP || artifact.isDirectory()) {
             System.out.println(artifact.dump(mode));
         } else {
             SecurityManager prevSecManager = System.getSecurityManager();
@@ -484,14 +485,24 @@ public final class Main {
     }
 
     /**
-     * Inspects an artifact.
+     * Parses the given <code>artifact</code> to an AST and attempts to find a node with the given <code>number</code>
+     * in the tree. If found, the {@link DumpMode#PRETTY_PRINT_DUMP} will be used to dump the node to standard out.
+     * If <code>scope</code> is not {@link KeyEnums.Type#NODE}, the method will walk up the tree to find a node that
+     * fits the requested <code>scope</code> and dump it instead.
      *
-     * @param artifact FileArtifact of the source file
-     * @param number number of the AST element that should be inspected
+     * @param artifact
+     *         the <code>FileArtifact</code> to parse to an AST
+     * @param number
+     *         the number of the <code>artifact</code> in the AST to find
+     * @param scope
+     *         the scope to dump
      */
     private static void inspectElement(FileArtifact artifact, int number, KeyEnums.Type scope) {
-        try {
-            ASTNodeArtifact element = ((ASTNodeArtifact) new ASTNodeArtifact(artifact).find("null:" + number));
+        ASTNodeArtifact astArtifact = new ASTNodeArtifact(artifact);
+        Optional<Artifact<ASTNodeArtifact>> foundNode = astArtifact.find(number);
+
+        if (foundNode.isPresent()) {
+            Artifact<ASTNodeArtifact> element = foundNode.get();
 
             if (scope != KeyEnums.Type.NODE) {
                 // walk tree upwards until scope fits
@@ -500,14 +511,18 @@ public final class Main {
                 }
             }
 
-            System.out.println(element.inspect());
-        } catch (Error extendJWTF) {
-            LOG.warning(extendJWTF.getMessage());
-            if (number > 1) {
-                inspectElement(artifact, number - 1, scope);
-            } else {
-                throw new RuntimeException("I am a bug. Please fix me!");
+            try {
+                System.out.println(element.dump(DumpMode.PRETTY_PRINT_DUMP));
+            } catch (Error extendJWTF) {
+                LOG.warning(extendJWTF.getMessage());
+                if (number > 1) {
+                    inspectElement(artifact, number - 1, scope);
+                } else {
+                    throw new RuntimeException("I am a bug. Please fix me!");
+                }
             }
+        } else {
+            LOG.log(Level.WARNING, () -> "Could not find a node with number " + number + ".");
         }
     }
 
