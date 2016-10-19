@@ -53,6 +53,7 @@ import de.fosd.jdime.stats.KeyEnums;
 import de.fosd.jdime.strdump.DumpMode;
 
 import static de.fosd.jdime.common.MergeContext.LOOKAHEAD_OFF;
+import static de.fosd.jdime.stats.KeyEnums.Type.IF;
 import static de.fosd.jdime.stats.KeyEnums.Type.METHOD;
 import static de.fosd.jdime.stats.KeyEnums.Type.TRY;
 
@@ -450,7 +451,7 @@ public class Matcher<T extends Artifact<T>> {
         if (lType == METHOD && rType == METHOD) {
             assert leftLAH != LOOKAHEAD_OFF && rightLAH != LOOKAHEAD_OFF;
             return Optional.of(UnorderedTuple.of(left, right));
-        } else if (lType == TRY) {
+        } else if (lType == TRY || lType == IF) {
             Optional<T> resume = findMatchingNode(left, right, leftLAH);
 
             if (resume.isPresent()) {
@@ -458,7 +459,7 @@ public class Matcher<T extends Artifact<T>> {
             } else {
                 return Optional.empty();
             }
-        } else if (rType == TRY) {
+        } else if (rType == TRY || rType == IF) {
             Optional<T> resume = findMatchingNode(right, left, rightLAH);
 
             if (resume.isPresent()) {

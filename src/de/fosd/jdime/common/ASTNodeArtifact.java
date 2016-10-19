@@ -38,18 +38,7 @@ import de.fosd.jdime.common.operations.MergeOperation;
 import de.fosd.jdime.common.operations.Operation;
 import de.fosd.jdime.merge.Merge;
 import de.fosd.jdime.stats.KeyEnums;
-import org.jastadd.extendj.ast.ASTNode;
-import org.jastadd.extendj.ast.BytecodeParser;
-import org.jastadd.extendj.ast.BytecodeReader;
-import org.jastadd.extendj.ast.ClassDecl;
-import org.jastadd.extendj.ast.ConstructorDecl;
-import org.jastadd.extendj.ast.ImportDecl;
-import org.jastadd.extendj.ast.InterfaceDecl;
-import org.jastadd.extendj.ast.JavaParser;
-import org.jastadd.extendj.ast.Literal;
-import org.jastadd.extendj.ast.MethodDecl;
-import org.jastadd.extendj.ast.Program;
-import org.jastadd.extendj.ast.TryStmt;
+import org.jastadd.extendj.ast.*;
 
 import static de.fosd.jdime.strdump.DumpMode.PLAINTEXT_TREE;
 
@@ -322,8 +311,10 @@ public class ASTNodeArtifact extends Artifact<ASTNodeArtifact> {
             return KeyEnums.Type.METHOD;
         } else if (isClass()) {
             return KeyEnums.Type.CLASS;
-        } else if (astnode instanceof TryStmt){
+        } else if (astnode instanceof TryStmt) {
             return KeyEnums.Type.TRY;
+        } else if (astnode instanceof IfStmt) {
+            return KeyEnums.Type.IF;
         } else {
             return KeyEnums.Type.NODE;
         }
