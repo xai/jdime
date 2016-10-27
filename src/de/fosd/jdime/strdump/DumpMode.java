@@ -55,6 +55,11 @@ public enum DumpMode {
     TGF_TREE(new TGFTreeDump()),
 
     /**
+     * Dump the tree in Tikz format.
+     */
+    TIKZ_TREE(new TikzTreeDump()),
+
+    /**
      * Read the file and dump its contents.
      */
     FILE_DUMP(new PrettyPrintDump()),
