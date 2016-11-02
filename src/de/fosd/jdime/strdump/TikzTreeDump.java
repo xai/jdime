@@ -148,7 +148,8 @@ public class TikzTreeDump implements StringDumper {
                                                         StringBuilder builder) {
 
         //builder.append("(").append(artifact.getId()).append(") ");
-        builder.append("node {" + getLabel.apply(artifact) + "}");
+        String label = getLabel.apply(artifact).replace("org.jastadd.extendj.ast.", "");
+        builder.append("node {" + label + "}");
     }
 
     /**
