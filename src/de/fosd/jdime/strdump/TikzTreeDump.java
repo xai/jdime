@@ -126,7 +126,9 @@ public class TikzTreeDump implements StringDumper {
             dumpTree(next, getLabel, childPrefix + "  ", childPrefix + "  ", builder);
             builder.append(LS + childPrefix + "}");
 
-            for (int i = 0; it.hasNext() && i < next.getSubtreeSize(); i++) {
+            boolean hasNext = it.hasNext();
+            int subtreeSize = next.getSubtreeSize();
+            for (int i = 0; hasNext && i < subtreeSize; i++) {
                 builder.append(LS + childPrefix + "child [missing] {}");
             }
         }
