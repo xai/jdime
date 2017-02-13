@@ -446,7 +446,7 @@ public class MergeContext implements Cloneable {
         }).ifPresent(this::setLookAhead);
 
         for (KeyEnums.Type type : KeyEnums.Type.values()) {
-            Optional<Integer> lah = config.get(JDimeConfig.LOOKAHEAD_PREFIX + type.name().toLowerCase(), val -> {
+            Optional<Integer> lah = config.get("lah" + type.name().toLowerCase(), val -> {
                 try {
                     return Optional.of(Integer.parseInt(val));
                 } catch (NumberFormatException e) {
