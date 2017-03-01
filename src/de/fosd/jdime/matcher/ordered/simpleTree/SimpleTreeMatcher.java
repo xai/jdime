@@ -23,11 +23,12 @@
  */
 package de.fosd.jdime.matcher.ordered.simpleTree;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.fosd.jdime.common.Artifact;
-import de.fosd.jdime.common.MergeContext;
+import de.fosd.jdime.artifact.Artifact;
+import de.fosd.jdime.config.merge.MergeContext;
 import de.fosd.jdime.matcher.MatcherInterface;
 import de.fosd.jdime.matcher.matching.Matching;
 import de.fosd.jdime.matcher.matching.Matchings;
@@ -62,8 +63,6 @@ public class SimpleTreeMatcher<T extends Artifact<T>> extends OrderedMatcher<T> 
      */
     @Override
     public Matchings<T> match(MergeContext context, T left, T right) {
-        long start = System.currentTimeMillis();
-
         int rootMatching = left.matches(right) ? 1 : 0;
 
         // number of first-level subtrees of t1
@@ -75,7 +74,7 @@ public class SimpleTreeMatcher<T extends Artifact<T>> extends OrderedMatcher<T> 
         int[][] matrixM = new int[m + 1][n + 1];
 
         @SuppressWarnings("unchecked")
-        Entry<T>[][] matrixT = new Entry[m + 1][n + 1];
+        Entry<T>[][] matrixT = (Entry<T>[][]) Array.newInstance(Entry.class, m + 1, n + 1);
 
         // initialize first column matrix
         for (int i = 0; i <= m; i++) {
@@ -141,7 +140,6 @@ public class SimpleTreeMatcher<T extends Artifact<T>> extends OrderedMatcher<T> 
 
         // total matching score for these trees is the score of the matched children + the matching of the root nodes
         Matching<T> matching = new Matching<>(left, right, matrixM[m][n] + rootMatching);
-        matching.setRuntime(System.currentTimeMillis() - start);
         matching.setAlgorithm(ID);
 
         Matchings<T> matchings = new Matchings<>();

@@ -24,9 +24,10 @@
 package de.fosd.jdime.matcher.matching;
 
 import java.util.Objects;
+import java.util.logging.Logger;
 
-import de.fosd.jdime.common.Artifact;
-import de.fosd.jdime.common.UnorderedTuple;
+import de.fosd.jdime.artifact.Artifact;
+import de.fosd.jdime.util.UnorderedTuple;
 
 /**
  * A container class representing a matching between two <code>T</code>s.
@@ -34,6 +35,8 @@ import de.fosd.jdime.common.UnorderedTuple;
  * @param <T> the type of the <code>Artifact</code>
  */
 public class Matching<T extends Artifact<T>> implements Cloneable, Comparable<Matching<T>> {
+
+    private static final Logger LOG = Logger.getLogger(Matching.class.getCanonicalName());
 
     /**
      * The algorithm that found the matching.
@@ -49,7 +52,6 @@ public class Matching<T extends Artifact<T>> implements Cloneable, Comparable<Ma
     private float percentage;
     private int score;
     private boolean fullyMatched;
-    private long runtime;
 
     /**
      * Constructs a new <code>Matching</code> between the two given <code>T</code>s.
@@ -90,7 +92,6 @@ public class Matching<T extends Artifact<T>> implements Cloneable, Comparable<Ma
         this.matchedArtifacts = UnorderedTuple.of(toCopy.matchedArtifacts.getX(), toCopy.matchedArtifacts.getY());
         this.percentage = toCopy.percentage;
         this.score = toCopy.score;
-        this.runtime = toCopy.runtime;
     }
 
     /**
@@ -137,21 +138,24 @@ public class Matching<T extends Artifact<T>> implements Cloneable, Comparable<Ma
     }
 
     /**
-     * Replaces one of the <code>Artifact</code>s contained in this <code>Matching</code> if it has the same id (as
-     * per {@link Artifact#getId()}) with <code>artifact</code>. Do not use if you do not exactly know what you are
-     * doing.
+     * Replaces {@code toReplace} with {@code artifact} in the {@link Artifact Artifacts} matched by this
+     * {@link Matching}. If {@code toReplace} is not part of this {@link Matching} no action is taken.
      *
      * @param artifact
-     *         the artifact to possibly insert into this <code>Matching</code>
+     *         the {@link Artifact} to replace {@code toReplace} with
+     * @param toReplace
+     *         the {@link Artifact} to replace with {@code artifact}
      */
-    public void updateMatching(T artifact) {
-        T left = getLeft();
-        T right = getRight();
+    public void updateMatching(T artifact, T toReplace) {
 
-        if (left.getId().equals(artifact.getId())) {
+        if (matchedArtifacts.getX() == toReplace) {
             matchedArtifacts.setX(artifact);
-        } else if (right.getId().equals(artifact.getId())) {
+        } else if (matchedArtifacts.getY() == toReplace) {
             matchedArtifacts.setY(artifact);
+        } else {
+            LOG.warning("Ignoring a call to Matching#updateMatching(T, T) as the Artifact to replace was not part of " +
+                        "the Matching.");
+            return;
         }
 
         calculatePercentage();
@@ -231,24 +235,6 @@ public class Matching<T extends Artifact<T>> implements Cloneable, Comparable<Ma
      */
     public void setAlgorithm(String algorithm) {
         this.algorithm = algorithm;
-    }
-
-    /**
-     * Set runtime for matching in milliseconds.
-     *
-     * @param milliseconds runtime
-     */
-    public void setRuntime(long milliseconds) {
-        this.runtime = milliseconds;
-    }
-
-    /**
-     * Returns runtime for matching in millisecons.
-     *
-     * @return runtime in millisecons
-     */
-    public long getRuntime() {
-        return runtime;
     }
 
     /**

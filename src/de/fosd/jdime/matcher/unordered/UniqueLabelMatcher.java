@@ -24,13 +24,12 @@
 package de.fosd.jdime.matcher.unordered;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import de.fosd.jdime.common.Artifact;
-import de.fosd.jdime.common.MergeContext;
+import de.fosd.jdime.artifact.Artifact;
+import de.fosd.jdime.config.merge.MergeContext;
 import de.fosd.jdime.matcher.MatcherInterface;
 import de.fosd.jdime.matcher.matching.Matching;
 import de.fosd.jdime.matcher.matching.Matchings;
@@ -46,11 +45,8 @@ public class UniqueLabelMatcher<T extends Artifact<T>> extends UnorderedMatcher<
 
     private static final String ID = UniqueLabelMatcher.class.getSimpleName();
 
-    private final Comparator<T> comp = (o1, o2) -> {
-
-        // we expect that the Artifacts have a unique label, if they do not an exception is to be expected
-        return o1.getUniqueLabel().get().get().compareTo(o2.getUniqueLabel().get().get());
-    };
+    // We expect that the Artifacts have a unique label, if they do not an exception is to be expected.
+    private final Comparator<T> comp = Comparator.comparing(o -> o.getUniqueLabel().get().get());
 
     /**
      * Constructs a new <code>UniqueLabelMatcher</code> using the given <code>matcher</code> for recursive calls.
@@ -69,25 +65,21 @@ public class UniqueLabelMatcher<T extends Artifact<T>> extends UnorderedMatcher<
      */
     @Override
     public final Matchings<T> match(final MergeContext context, final T left, final T right) {
-        long start = System.currentTimeMillis();
-
         int rootMatching = left.matches(right) ? 1 : 0;
 
         if (left.getNumChildren() == 0 || right.getNumChildren() == 0) {
             Matchings<T> m = Matchings.of(left, right, rootMatching);
-            Matching<T> matching = m.get(left, right).get();
-            matching.setRuntime(System.currentTimeMillis() - start);
-            matching.setAlgorithm(ID);
+            m.get(left, right).get().setAlgorithm(ID);
 
             return m;
         }
 
         List<Matchings<T>> childrenMatchings = new ArrayList<>();
-        List<T> leftChildren = left.getChildren();
-        List<T> rightChildren = right.getChildren();
+        List<T> leftChildren = new ArrayList<>(left.getChildren());
+        List<T> rightChildren = new ArrayList<>(right.getChildren());
 
-        Collections.sort(leftChildren, comp);
-        Collections.sort(rightChildren, comp);
+        leftChildren.sort(comp);
+        rightChildren.sort(comp);
 
         Iterator<T> leftIt = leftChildren.iterator();
         Iterator<T> rightIt = rightChildren.iterator();
@@ -127,9 +119,7 @@ public class UniqueLabelMatcher<T extends Artifact<T>> extends UnorderedMatcher<
         }
 
         Matchings<T> result = Matchings.of(left, right, sum + rootMatching);
-        Matching<T> matching = result.get(left, right).get();
-        matching.setRuntime(System.currentTimeMillis() - start);
-        matching.setAlgorithm(ID);
+        result.get(left, right).get().setAlgorithm(ID);
         result.addAllMatchings(childrenMatchings);
 
         return result;

@@ -25,10 +25,10 @@ package de.fosd.jdime.matcher.matching;
 
 import java.util.Objects;
 
-import de.fosd.jdime.common.Artifact;
-import de.fosd.jdime.common.MergeContext;
-import de.fosd.jdime.common.UnorderedTuple;
+import de.fosd.jdime.artifact.Artifact;
+import de.fosd.jdime.config.merge.MergeContext;
 import de.fosd.jdime.matcher.Matcher;
+import de.fosd.jdime.util.UnorderedTuple;
 
 /**
  * This <code>Matching</code> is used by the <code>Matcher</code> if lookahead is enabled. The concrete
@@ -64,7 +64,6 @@ public class LookAheadMatching<T extends Artifact<T>> extends Matching<T> {
         super(realMatching.getLeft(), realMatching.getRight(), realMatching.getScore());
         this.lookAheadFrom = UnorderedTuple.of(lookAheadLeft, lookAheadRight);
         this.setAlgorithm(realMatching.getAlgorithm());
-        this.setRuntime(realMatching.getRuntime());
     }
 
     @Override

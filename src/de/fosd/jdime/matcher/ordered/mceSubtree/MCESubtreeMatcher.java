@@ -27,8 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import de.fosd.jdime.common.Artifact;
-import de.fosd.jdime.common.MergeContext;
+import de.fosd.jdime.artifact.Artifact;
+import de.fosd.jdime.config.merge.MergeContext;
 import de.fosd.jdime.matcher.MatcherInterface;
 import de.fosd.jdime.matcher.matching.Matching;
 import de.fosd.jdime.matcher.matching.Matchings;
@@ -61,8 +61,6 @@ public class MCESubtreeMatcher<T extends Artifact<T>> extends OrderedMatcher<T> 
 
     @Override
     public Matchings<T> match(MergeContext context, T left, T right) {
-        long start = System.currentTimeMillis();
-
         BalancedSequence<T> lSeq = new BalancedSequence<>(left);
         BalancedSequence<T> rSeq = new BalancedSequence<>(right);
 
@@ -72,7 +70,6 @@ public class MCESubtreeMatcher<T extends Artifact<T>> extends OrderedMatcher<T> 
         Matchings<T> matchings = new Matchings<>();
         Matching<T> matching = new Matching<>(left, right, BalancedSequence.lcs(lSeq, rSeq));
 
-        matching.setRuntime(System.currentTimeMillis() - start);
         matching.setAlgorithm(ID);
         matchings.add(matching);
 

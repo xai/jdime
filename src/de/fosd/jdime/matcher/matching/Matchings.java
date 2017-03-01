@@ -25,7 +25,6 @@ package de.fosd.jdime.matcher.matching;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,9 +33,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
-import de.fosd.jdime.common.Artifact;
-import de.fosd.jdime.common.UnorderedTuple;
+import de.fosd.jdime.artifact.Artifact;
+import de.fosd.jdime.util.UnorderedTuple;
 
 /**
  * A <code>Set</code> of <code>Matching</code>s. Adds methods to retrieve specific elements of the <code>Set</code>
@@ -46,6 +46,8 @@ import de.fosd.jdime.common.UnorderedTuple;
  *         the type of the <code>Artifact</code>s
  */
 public class Matchings<T extends Artifact<T>> extends HashSet<Matching<T>> {
+
+    private static final long serialVersionUID = 1L;
 
     private final UnorderedTuple<T, T> tuple = UnorderedTuple.of(null, null);
 
@@ -124,6 +126,61 @@ public class Matchings<T extends Artifact<T>> extends HashSet<Matching<T>> {
         tuple.setY(null);
 
         return matching;
+    }
+
+    /**
+     * Returns the first matching having the given <code>artifact</code> as its left component,
+     * if no such matching exists, returns the first having <code>artifact</code> as its right
+     * component. If neither exits returns an empty <code>Optional</code>.
+     *
+     * @param artifact
+     *         the <code>Artifact</code> to search for
+     * @return optionally the first <code>Matching</code> containing <code>artifact</code>
+     */
+    public Optional<Matching<T>> getAny(T artifact) {
+        Optional<Matching<T>> left = getLeft(artifact);
+
+        if (left.isPresent()) {
+            return left;
+        } else {
+            return getRight(artifact);
+        }
+    }
+
+    /**
+     * Returns the first matching having the given <code>artifact</code> as its left component. If no such matching
+     * exits returns an empty <code>Optional</code>.
+     *
+     * @param artifact
+     *         the <code>Artifact</code> to search for
+     * @return optionally the first <code>Matching</code> containing <code>artifact</code>
+     */
+    public Optional<Matching<T>> getLeft(T artifact) {
+        return get(artifact, Matching::getLeft);
+    }
+
+    /**
+     * Returns the first matching having the given <code>artifact</code> as its right component. If no such matching
+     * exits returns an empty <code>Optional</code>.
+     *
+     * @param artifact
+     *         the <code>Artifact</code> to search for
+     * @return optionally the first <code>Matching</code> containing <code>artifact</code>
+     */
+    public Optional<Matching<T>> getRight(T artifact) {
+        return get(artifact, Matching::getRight);
+    }
+
+    /**
+     * Returns the first matching whose result of the application of <code>getArtifact</code> is equal to
+     * <code>artifact</code>.
+     *
+     * @param artifact
+     *         the <code>Artifact</code> to search for
+     * @return optionally the first <code>Matching</code> containing <code>artifact</code>
+     */
+    private Optional<Matching<T>> get(T artifact, Function<Matching<T>, T> getArtifact) {
+        return stream().filter(m -> getArtifact.apply(m) == artifact).findFirst();
     }
 
     /**
@@ -209,7 +266,7 @@ public class Matchings<T extends Artifact<T>> extends HashSet<Matching<T>> {
         Comparator<Matching<T>> comp = (o1, o2) -> Float.compare(o1.getPercentage(), o2.getPercentage());
 
         for (Map.Entry<Artifact<T>, List<Matching<T>>> entry : matchings.entrySet()) {
-            Collections.sort(entry.getValue(), comp.reversed());
+            (entry.getValue()).sort(comp.reversed());
 
             for (Matching<T> max : entry.getValue()) {
 

@@ -23,6 +23,8 @@
  */
 package de.fosd.jdime.stats;
 
+import org.jastadd.extendj.ast.Block;
+
 /**
  * Container class to hold enums used as categories for the <code>Statistics</code> class.
  */
@@ -78,7 +80,12 @@ public final class KeyEnums {
         /**
          * An AST node representing a if statement
          */
-        IF
+        IF,
+
+        /**
+         * An AST node representing a generic block statement.
+         */
+        BLOCK
     }
 
     /**

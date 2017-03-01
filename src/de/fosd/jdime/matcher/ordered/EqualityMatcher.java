@@ -32,12 +32,12 @@ import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import de.fosd.jdime.common.Artifact;
-import de.fosd.jdime.common.MergeContext;
-import de.fosd.jdime.common.UnorderedTuple;
+import de.fosd.jdime.artifact.Artifact;
+import de.fosd.jdime.config.merge.MergeContext;
 import de.fosd.jdime.matcher.MatcherInterface;
 import de.fosd.jdime.matcher.matching.Matching;
 import de.fosd.jdime.matcher.matching.Matchings;
+import de.fosd.jdime.util.UnorderedTuple;
 
 /**
  * The <code>EqualityMatcher</code> can be used to compute <code>Matchings</code> for identical trees.
@@ -46,7 +46,7 @@ import de.fosd.jdime.matcher.matching.Matchings;
  * <code>EqualityMatcher</code> does not use its parent matcher to dispatch match() calls, and uses its own
  * implementation instead.
  * <p>
- * Usage:<br/>
+ * Usage:<br>
  * To check whether the trees are equal, extract the <code>Matching</code> with the highest score and compare it
  * with the size of the trees.
  *
@@ -61,7 +61,7 @@ public class EqualityMatcher<T extends Artifact<T>> extends OrderedMatcher<T> {
     private Set<UnorderedTuple<T, T>> didNotMatch;
 
     /**
-     * Constructs a new <code>EqualityMatcher</code>.<br/>
+     * Constructs a new <code>EqualityMatcher</code>.<br>
      * This matcher does not use the parent matcher to dispatch further calls.
      *
      * @param matcher the parent <code>MatcherInterface</code>
@@ -73,8 +73,6 @@ public class EqualityMatcher<T extends Artifact<T>> extends OrderedMatcher<T> {
 
     @Override
     public Matchings<T> match(MergeContext context, T left, T right) {
-        long start = System.currentTimeMillis();
-
         Matchings<T> matchings = new Matchings<>();
 
         List<Matching<T>> directChildMatchings = new ArrayList<>();
@@ -100,15 +98,12 @@ public class EqualityMatcher<T extends Artifact<T>> extends OrderedMatcher<T> {
 
         if (allMatched && left.getNumChildren() == right.getNumChildren() && left.matches(right)) {
             Integer sumScore = directChildMatchings.stream().map(Matching::getScore).collect(SUM_IDENTITY);
+            matchings.add(new Matching<>(left, right, sumScore + 1));
 
             LOG.finer(() -> {
                 String format = "%s - Trees are equal: (%s, %s)";
                 return String.format(format, ID, left.getId(), right.getId());
             });
-
-            Matching<T> matching = new Matching<>(left, right, sumScore + 1);
-            matching.setRuntime(System.currentTimeMillis() - start);
-            matchings.add(matching);
         } else {
             didNotMatch.add(UnorderedTuple.of(left, right));
 
@@ -118,7 +113,7 @@ public class EqualityMatcher<T extends Artifact<T>> extends OrderedMatcher<T> {
             });
         }
 
-        matchings.stream().forEach(m -> m.setAlgorithm(ID));
+        matchings.forEach(m -> m.setAlgorithm(ID));
 
         return matchings;
     }

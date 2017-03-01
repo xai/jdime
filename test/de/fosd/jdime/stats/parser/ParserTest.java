@@ -29,6 +29,7 @@ import de.fosd.jdime.JDimeTest;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -38,8 +39,8 @@ public class ParserTest extends JDimeTest {
 
     @Test
     public void testParse() throws Exception {
-        File file = file("threeway", "linebased", "SimpleTests", "Bag", "Bag2.java");
-        String code = FileUtils.readFileToString(file);
+        File file = file(resultsDir, "linebased", "SimpleTests", "Bag", "Bag2.java");
+        String code = FileUtils.readFileToString(file, UTF_8);
         ParseResult result = Parser.parse(code);
 
         assertEquals(11, result.getLinesOfCode());
@@ -47,8 +48,8 @@ public class ParserTest extends JDimeTest {
         assertEquals(7, result.getConflictingLinesOfCode());
         assertEquals(normalize(code), normalize(result.toString()));
 
-        file = file("threeway", "linebased", "SimpleTests", "Bag", "Bag3.java");
-        code = FileUtils.readFileToString(file);
+        file = file(resultsDir, "linebased", "SimpleTests", "Bag", "Bag3.java");
+        code = FileUtils.readFileToString(file, UTF_8);
         result = Parser.parse(code);
 
         assertEquals(20, result.getLinesOfCode());
@@ -56,8 +57,8 @@ public class ParserTest extends JDimeTest {
         assertEquals(0, result.getConflictingLinesOfCode());
         assertEquals(normalize(code), normalize(result.toString()));
 
-        file = file("threeway", "linebased", "ParserTest", "Comments.java");
-        code = FileUtils.readFileToString(file);
+        file = file(resultsDir, "linebased", "ParserTest", "Comments.java");
+        code = FileUtils.readFileToString(file, UTF_8);
         result = Parser.parse(code);
 
         assertEquals(7, result.getLinesOfCode());
@@ -65,8 +66,8 @@ public class ParserTest extends JDimeTest {
         assertEquals(0, result.getConflictingLinesOfCode());
         assertEquals(normalize(code), normalize(result.toString()));
 
-        file = file("threeway", "linebased", "ParserTest", "CommentsConflict.java");
-        code = FileUtils.readFileToString(file);
+        file = file(resultsDir, "linebased", "ParserTest", "CommentsConflict.java");
+        code = FileUtils.readFileToString(file, UTF_8);
         result = Parser.parse(code);
 
         assertEquals(11, result.getLinesOfCode());

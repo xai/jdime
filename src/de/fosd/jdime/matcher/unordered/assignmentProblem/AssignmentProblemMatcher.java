@@ -23,13 +23,15 @@
  */
 package de.fosd.jdime.matcher.unordered.assignmentProblem;
 
-import de.fosd.jdime.common.Artifact;
-import de.fosd.jdime.common.MergeContext;
-import de.fosd.jdime.common.Tuple;
+import java.lang.reflect.Array;
+
+import de.fosd.jdime.artifact.Artifact;
+import de.fosd.jdime.config.merge.MergeContext;
 import de.fosd.jdime.matcher.MatcherInterface;
 import de.fosd.jdime.matcher.matching.Matching;
 import de.fosd.jdime.matcher.matching.Matchings;
 import de.fosd.jdime.matcher.unordered.UnorderedMatcher;
+import de.fosd.jdime.util.Tuple;
 
 /**
  * <code>UnorderedMatcher</code> that solves the assignment problem, which
@@ -60,8 +62,6 @@ public abstract class AssignmentProblemMatcher<T extends Artifact<T>> extends Un
      */
     @Override
     public final Matchings<T> match(final MergeContext context, final T left, final T right) {
-        long start = System.currentTimeMillis();
-
         int rootMatching = left.matches(right) ? 1 : 0;
 
         // number of first-level subtrees of t1
@@ -72,15 +72,13 @@ public abstract class AssignmentProblemMatcher<T extends Artifact<T>> extends Un
 
         if (m == 0 || n == 0) {
             Matchings<T> matchings = Matchings.of(left, right, rootMatching);
-            Matching<T> matching =  matchings.get(left, right).get();
-            matching.setRuntime(System.currentTimeMillis());
-            matching.setAlgorithm(ID);
+            matchings.get(left, right).get().setAlgorithm(ID);
 
             return matchings;
         }
 
         @SuppressWarnings("unchecked")
-        Tuple<Integer, Matchings<T>>[][] matchings = new Tuple[m][n];
+        Tuple<Integer, Matchings<T>>[][] matchings = (Tuple<Integer, Matchings<T>>[][]) Array.newInstance(Tuple.class, m, n);
 
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {

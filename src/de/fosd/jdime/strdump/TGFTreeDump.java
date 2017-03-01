@@ -33,12 +33,12 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-import de.fosd.jdime.common.Artifact;
+import de.fosd.jdime.artifact.Artifact;
 
 /**
  * Dumps the given <code>Artifact</code> tree using the TGF format.
  *
- * @see <href link="http://docs.yworks.com/yfiles/doc/developers-guide/tgf.html">TGF</href>
+ * @see <a href="http://docs.yworks.com/yfiles/doc/developers-guide/tgf.html">TGF</a>
  */
 public class TGFTreeDump implements StringDumper {
 

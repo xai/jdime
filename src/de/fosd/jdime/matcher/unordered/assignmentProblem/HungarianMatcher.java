@@ -26,11 +26,11 @@ package de.fosd.jdime.matcher.unordered.assignmentProblem;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.fosd.jdime.common.Artifact;
-import de.fosd.jdime.common.Tuple;
+import de.fosd.jdime.artifact.Artifact;
 import de.fosd.jdime.matcher.MatcherInterface;
 import de.fosd.jdime.matcher.matching.Matching;
 import de.fosd.jdime.matcher.matching.Matchings;
+import de.fosd.jdime.util.Tuple;
 
 /**
  * This unordered matcher uses the hungarian algorithm to solve the assignment
@@ -64,8 +64,6 @@ public class HungarianMatcher<T extends Artifact<T>> extends AssignmentProblemMa
      */
     @Override
     protected Matchings<T> solveAssignmentProblem(T left, T right, Tuple<Integer, Matchings<T>>[][] childrenMatching, int rootMatching) {
-        long start = System.currentTimeMillis();
-
         int m = childrenMatching.length;
         int n = childrenMatching[0].length;
         int[][] matrix = new int[m][n];
@@ -112,7 +110,6 @@ public class HungarianMatcher<T extends Artifact<T>> extends AssignmentProblemMa
         }
 
         Matching<T> matching = new Matching<>(left, right, score + rootMatching);
-        matching.setRuntime(System.currentTimeMillis() - start);
         matching.setAlgorithm(ID);
 
         Matchings<T> result = new Matchings<>();

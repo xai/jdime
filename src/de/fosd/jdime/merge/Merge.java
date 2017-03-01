@@ -24,22 +24,21 @@
 package de.fosd.jdime.merge;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import de.fosd.jdime.common.ASTNodeArtifact;
-import de.fosd.jdime.common.Artifact;
-import de.fosd.jdime.common.MergeContext;
-import de.fosd.jdime.common.MergeScenario;
-import de.fosd.jdime.common.Revision;
-import de.fosd.jdime.common.operations.ConflictOperation;
-import de.fosd.jdime.common.operations.DeleteOperation;
-import de.fosd.jdime.common.operations.MergeOperation;
+import de.fosd.jdime.artifact.Artifact;
+import de.fosd.jdime.artifact.ast.ASTNodeArtifact;
+import de.fosd.jdime.config.merge.MergeContext;
+import de.fosd.jdime.config.merge.MergeScenario;
+import de.fosd.jdime.config.merge.Revision;
 import de.fosd.jdime.matcher.Matcher;
 import de.fosd.jdime.matcher.matching.Color;
 import de.fosd.jdime.matcher.matching.Matching;
+import de.fosd.jdime.operations.AddOperation;
+import de.fosd.jdime.operations.ConflictOperation;
+import de.fosd.jdime.operations.MergeOperation;
 
+import static de.fosd.jdime.artifact.Artifacts.root;
 import static de.fosd.jdime.strdump.DumpMode.PLAINTEXT_TREE;
 
 /**
@@ -75,11 +74,7 @@ public class Merge<T extends Artifact<T>> implements MergeInterface<T> {
         Revision b = base.getRevision();
         Revision r = right.getRevision();
 
-        if (!context.isDiffOnly() && !context.isPretend()) {
-            Objects.requireNonNull(target, "target must not be null!");
-        }
-
-        Matcher<T> matcher = new Matcher<>();
+        Matcher<T> matcher = null;
         Matching<T> m;
 
         if (!left.hasMatching(r) && !right.hasMatching(l)) {
@@ -87,14 +82,16 @@ public class Merge<T extends Artifact<T>> implements MergeInterface<T> {
                 // 3-way merge
 
                 // diff base left
-                m = matcher.match(context, base, left, Color.GREEN).get(base, left).get();
+                matcher = new Matcher<>(base, left);
+                m = matcher.match(context, Color.GREEN).get(base, left).get();
 
                 if (m.getScore() == 0) {
                     LOG.fine(() -> String.format("%s and %s have no matches.", base.getId(), left.getId()));
                 }
 
                 // diff base right
-                m = matcher.match(context, base, right, Color.GREEN).get(base, right).get();
+                matcher = new Matcher<>(matcher, base, right);
+                m = matcher.match(context, Color.GREEN).get(base, right).get();
 
                 if (m.getScore() == 0) {
                     LOG.fine(() -> String.format("%s and %s have no matches.", base.getId(), right.getId()));
@@ -102,7 +99,8 @@ public class Merge<T extends Artifact<T>> implements MergeInterface<T> {
             }
 
             // diff left right
-            m = matcher.match(context, left, right, Color.BLUE).get(left, right).get();
+            matcher = new Matcher<>(matcher, left, right);
+            m = matcher.match(context, Color.BLUE).get(left, right).get();
 
             if (context.isDiffOnly() && left.isRoot() && left instanceof ASTNodeArtifact) {
                 assert (right.isRoot());
@@ -122,14 +120,14 @@ public class Merge<T extends Artifact<T>> implements MergeInterface<T> {
 
         if (!((left.isChoice() || left.hasMatching(right)) && right.hasMatching(left))) {
             LOG.severe(left.getId() + " and " + right.getId() + " have no matches.");
-            LOG.severe("left: " + left.findRoot().dump(PLAINTEXT_TREE));
-            LOG.severe("right: " + right.findRoot().dump(PLAINTEXT_TREE));
+            LOG.severe("left: " + root(left).dump(PLAINTEXT_TREE));
+            LOG.severe("right: " + root(right).dump(PLAINTEXT_TREE));
             throw new RuntimeException();
         }
 
-        if (target != null && target.isRoot() && !target.hasMatches()) {
-            // hack to fix the matches for the merged root node
-            target.cloneMatches(left);
+        // TODO figure out how to record matches in the target root node without this hack
+        if (target.isRoot() && !target.hasMatches()) {
+            target.copyMatches(left);
         }
 
         // check if one or both the nodes have no children
@@ -140,50 +138,49 @@ public class Merge<T extends Artifact<T>> implements MergeInterface<T> {
         LOG.finest(() -> String.format("%s -> (%s)", prefix(left), leftChildren));
         LOG.finest(() -> String.format("%s -> (%s)", prefix(right), rightChildren));
 
-        if ((base.isEmpty() || base.hasChildren()) && (leftChildren.isEmpty() || rightChildren.isEmpty())) {
-            if (leftChildren.isEmpty() && rightChildren.isEmpty()) {
+        if (!left.hasChildren() || !right.hasChildren()) {
+
+            if (!left.hasChildren() && !right.hasChildren()) {
                 LOG.finest(() -> String.format("%s and [%s] have no children", prefix(left), right.getId()));
                 return;
-            } else if (leftChildren.isEmpty()) {
+            } else if (!left.hasChildren()) {
                 LOG.finest(() -> String.format("%s has no children", prefix(left)));
-                LOG.finest(() -> String.format("%s was deleted by left", prefix(right)));
 
-                if (right.hasChanges(b)) {
+                if (!base.hasChildren() || !right.hasChanges(b)) {
+
+                    for (T rightChild : right.getChildren()) {
+                        AddOperation<T> addOp = new AddOperation<>(rightChild, target, r.getName());
+                        addOp.apply(context);
+                    }
+                    return;
+                } else {
+                    LOG.finest(() -> String.format("%s was deleted by left", prefix(right)));
                     LOG.finest(() -> String.format("%s has changes in subtree", prefix(right)));
 
                     for (T rightChild : right.getChildren()) {
-                        ConflictOperation<T> conflictOp = new ConflictOperation<>(
-                                null, rightChild, target, l.getName(), r.getName());
+                        ConflictOperation<T> conflictOp = new ConflictOperation<>(null, rightChild, target, l.getName(), r.getName());
                         conflictOp.apply(context);
-                    }
-                    return;
-                } else {
-
-                    for (T rightChild : rightChildren) {
-
-                        DeleteOperation<T> delOp = new DeleteOperation<>(rightChild, target, triple, l.getName());
-                        delOp.apply(context);
                     }
                     return;
                 }
-            } else if (rightChildren.isEmpty()) {
+            } else if (!right.hasChildren()) {
                 LOG.finest(() -> String.format("%s has no children", prefix(right)));
-                LOG.finest(() -> String.format("%s was deleted by right", prefix(left)));
 
-                if (left.hasChanges(b)) {
-                    LOG.finest(() -> String.format("%s has changes in subtree", prefix(left)));
+
+                if (!base.hasChildren() || !left.hasChanges(b)) {
 
                     for (T leftChild : left.getChildren()) {
-                        ConflictOperation<T> conflictOp = new ConflictOperation<>(
-                                leftChild, null, target, l.getName(), r.getName());
-                        conflictOp.apply(context);
+                        AddOperation<T> addOp = new AddOperation<>(leftChild, target, l.getName());
+                        addOp.apply(context);
                     }
                     return;
                 } else {
+                    LOG.finest(() -> String.format("%s was deleted by right", prefix(left)));
+                    LOG.finest(() -> String.format("%s has changes in subtree", prefix(left)));
 
-                    for (T leftChild : leftChildren) {
-                        DeleteOperation<T> delOp = new DeleteOperation<>(leftChild, target, triple, r.getName());
-                        delOp.apply(context);
+                    for (T leftChild : left.getChildren()) {
+                        ConflictOperation<T> conflictOp = new ConflictOperation<>(leftChild, null, target, l.getName(), r.getName());
+                        conflictOp.apply(context);
                     }
                     return;
                 }
@@ -205,9 +202,11 @@ public class Merge<T extends Artifact<T>> implements MergeInterface<T> {
             }
         }
 
-        if (LOG.isLoggable(Level.FINEST) && target != null) {
-            LOG.finest(String.format("%s target.dumpTree() before merge:", logprefix));
-            System.out.println(target.findRoot().dump(PLAINTEXT_TREE));
+        if (!context.isDiffOnly()) {
+            LOG.finest(() -> {
+                String dump = root(target).dump(PLAINTEXT_TREE);
+                return String.format("%s target.dumpTree() before merge:%n%s", logprefix, dump);
+            });
         }
 
         if (isOrdered) {
