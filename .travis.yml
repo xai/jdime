@@ -13,6 +13,20 @@ addons:
         - oracle-java8-installer
         - git
         - cmake
+        - libglpk-dev
+        - libglpk-java
+
+before_install:
+  - echo glpkJava=$(dpkg -L libglpk-java | egrep 'libglpk_java.so$') > gradle.properties
+  - echo glpk=$(dpkg -L libglpk-dev | egrep 'libglpk.so$') >> gradle.properties
+  - wget https://github.com/libgit2/libgit2/archive/v0.26.0.tar.gz
+  - tar -xaf v0.26.0.tar.gz
+  - cd libgit2-0.26.0
+  - mkdir build && cd build
+  - cmake ..
+  - cmake --build .
+  - cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+  - sudo cmake --build . --target install
 
 notifications:
     irc:
@@ -21,15 +35,3 @@ notifications:
         use_notice: true
         on_success: change
         on_failure: always
-
-install:
-    - wget https://github.com/libgit2/libgit2/archive/v0.26.0.tar.gz
-    - tar -xaf v0.26.0.tar.gz
-    - cd libgit2-0.26.0
-    - mkdir build && cd build
-    - cmake ..
-    - cmake --build .
-    - cmake .. -DCMAKE_INSTALL_PREFIX=/usr
-    - sudo cmake --build . --target install
-    - cd ../..
-    - ./gradlew build

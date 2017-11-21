@@ -64,6 +64,10 @@ sourceSets {
 
 repositories {
     mavenCentral()
+    maven { // for glpk-java
+        name = 'Xypron Release'
+        url = 'http://rsync.xypron.de/repository'
+    }
 }
 
 dependencies {
@@ -73,6 +77,7 @@ dependencies {
     compile 'commons-codec:commons-codec:1.11'
     compile 'com.thoughtworks.xstream:xstream:1.4.10'
     compile 'com.google.code.gson:gson:2.8.2'
+    compile 'org.gnu.glpk:glpk-java:1.0.37'
     compile 'de.uni-passau.fim.seibt:kvconfig:1.0'
     compile project(':JNativeMerge')
     compile files('lib/extendj.jar')
@@ -108,12 +113,77 @@ idea {
 def loggingConfigFile = file('JDimeLogging.properties')
 def configFile = file('JDime.properties')
 
+def libraryPathOpt = '-Djava.library.path=.'
 def defaultOpts = ["-Xmx2048m", "-ea"]
+task natives {
+    def fail = false;
+    def glpk_version = "4_56"
+    def glpk_java_prop_name = "glpkJava"
+    def glpk_prop_name = "glpk"
+    def glpk_java_name
+    def glpk_name
+
+    def os = System.getProperty("os.name").toLowerCase()
+
+    if (os.contains("windows")) {
+        glpk_java_name = "glpk_${glpk_version}_java.dll"
+        glpk_name = "glpk_${glpk_version}.dll"
+    } else if (os.contains("mac")) {
+        glpk_java_name = "libglpk_java.dylib"
+        glpk_name = "libglpk.dylib"
+    } else {
+        glpk_java_name = "libglpk_java.so"
+        glpk_name = "libglpk.so"
+    }
+
+    if (!rootProject.hasProperty(glpk_java_prop_name)) {
+        println "Provide the path to the $glpk_java_name native library using the $glpk_java_prop_name property."
+        fail = true;
+    }
+    if (!rootProject.hasProperty(glpk_prop_name)) {
+        println "Provide the path to the $glpk_name native library using the $glpk_prop_name property."
+        fail = true;
+    }
+
+    if (fail) {
+        throw new InvalidUserDataException("Missing native library paths.");
+    }
+
+    def glpkJavaFile = file(rootProject."$glpk_java_prop_name").getAbsoluteFile()
+    def glpkFile = file(rootProject."$glpk_prop_name").getAbsoluteFile()
+
+    if (glpkJavaFile.exists()) {
+        if (!glpkJavaFile.isFile() || glpkJavaFile.getName() != glpk_java_name) {
+            println "$glpkJavaFile is not a file or does not have the correct name. Expecting $glpk_java_name."
+            fail = true;
+        }
+    } else {
+        println "$glpkJavaFile does not exist."
+        fail = true;
+    }
+
+    if (glpkFile.exists()) {
+        if (!glpkFile.isFile() || glpkFile.getName() != glpk_name) {
+            println "$glpkFile is not a file or does not have the correct name. Expecting $glpk_name."
+            fail = true;
+        }
+    } else {
+        println "$glpkFile does not exist."
+        fail = true;
+    }
+
+    if (fail) {
+        throw new InvalidUserDataException("Invalid native libraries.");
+    }
+
+    inputs.files(glpkFile, glpkJavaFile)
+    outputs.files(glpkFile, glpkJavaFile)
+}
 
 startScripts {
     applicationName = rootProject.name
     mainClassName = "de.fosd.jdime.Main"
-    defaultJvmOpts = defaultOpts
+    defaultJvmOpts = defaultOpts + libraryPathOpt
 }
 
 task guiScripts(type: CreateStartScripts) {
@@ -131,6 +201,9 @@ distributions.with {
             into(binDir) {
                 from(guiScripts)
                 fileMode = 0755
+            }
+            into(binDir) {
+                from(natives)
             }
         }
 
@@ -155,6 +228,8 @@ distributions.with {
                 from project.projectDir, {
                     include loggingConfigFile.name
                 }
+
+                from(natives)
             }
         }
     }
@@ -172,9 +247,10 @@ run {
 }
 
 test {
-    systemProperty "java.util.logging.config.file", loggingConfigFile.getAbsolutePath()
+    jvmArgs libraryPathOpt
     maxHeapSize = '2048m'
     enableAssertions = true
+    workingDir new File(installDist.destinationDir, 'bin')
 }
 
 task getTestFiles {

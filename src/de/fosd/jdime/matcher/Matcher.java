@@ -23,6 +23,10 @@
  */
 package de.fosd.jdime.matcher;
 
+import static de.fosd.jdime.config.merge.MergeContext.LOOKAHEAD_OFF;
+import static de.fosd.jdime.stats.KeyEnums.Type.METHOD;
+import static de.fosd.jdime.stats.KeyEnums.Type.TRY;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,16 +48,12 @@ import de.fosd.jdime.matcher.ordered.OrderedMatcher;
 import de.fosd.jdime.matcher.ordered.mceSubtree.MCESubtreeMatcher;
 import de.fosd.jdime.matcher.ordered.simpleTree.SimpleTreeMatcher;
 import de.fosd.jdime.matcher.unordered.IdenticalSubtreeMatcher;
+import de.fosd.jdime.matcher.unordered.LPMatcher;
 import de.fosd.jdime.matcher.unordered.UniqueLabelMatcher;
 import de.fosd.jdime.matcher.unordered.UnorderedMatcher;
-import de.fosd.jdime.matcher.unordered.assignmentProblem.HungarianMatcher;
 import de.fosd.jdime.stats.KeyEnums;
 import de.fosd.jdime.strdump.DumpMode;
 import de.fosd.jdime.util.UnorderedTuple;
-
-import static de.fosd.jdime.config.merge.MergeContext.LOOKAHEAD_OFF;
-import static de.fosd.jdime.stats.KeyEnums.Type.METHOD;
-import static de.fosd.jdime.stats.KeyEnums.Type.TRY;
 
 /**
  * A <code>Matcher</code> is used to compare two <code>Artifacts</code> and to
@@ -113,7 +113,8 @@ public class Matcher<T extends Artifact<T>> {
             return match(context, left, right);
         };
 
-        this.unorderedMatcher = new HungarianMatcher<>(rootMatcher);
+        this.unorderedMatcher = new LPMatcher<>(rootMatcher);
+        //this.unorderedMatcher = new HungarianMatcher<>(rootMatcher);
         this.unorderedLabelMatcher = new UniqueLabelMatcher<>(rootMatcher);
         this.orderedMatcher = new SimpleTreeMatcher<>(rootMatcher);
         this.mceSubtreeMatcher = new MCESubtreeMatcher<>(rootMatcher);
