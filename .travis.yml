@@ -13,6 +13,10 @@ addons:
         - oracle-java8-installer
         - git
 
+before_install:
+  - echo glpkJava=$(dpkg -L libglpk-java | egrep 'libglpk_java.so$') > gradle.properties
+  - echo glpk=$(dpkg -L libglpk-dev | egrep 'libglpk.so$') >> gradle.properties
+
 notifications:
     irc:
         channels: "irc.freenode.org#jdime"
@@ -20,3 +24,5 @@ notifications:
         use_notice: true
         on_success: change
         on_failure: always
+        - libglpk-dev
+        - libglpk-java
