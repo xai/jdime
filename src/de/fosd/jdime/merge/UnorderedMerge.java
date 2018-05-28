@@ -62,6 +62,9 @@ public class UnorderedMerge<T extends Artifact<T>> implements MergeInterface<T> 
      */
     @Override
     public void merge(MergeOperation<T> operation, MergeContext context) {
+        boolean assertsEnabled = false;
+        assert assertsEnabled = true;
+
         assert (operation != null);
         assert (context != null);
 
@@ -91,6 +94,9 @@ public class UnorderedMerge<T extends Artifact<T>> implements MergeInterface<T> 
         T leftChild = null;
         T rightChild = null;
 
+        T oldLeftChild = null;
+        T oldRightChild = null;
+
         if (leftIt.hasNext()) {
             leftChild = leftIt.next();
         } else {
@@ -103,6 +109,14 @@ public class UnorderedMerge<T extends Artifact<T>> implements MergeInterface<T> 
         }
 
         while (!leftdone || !rightdone) {
+            assert (!(oldLeftChild == leftChild && oldRightChild == rightChild))
+                    : String.format("%s: (%s, %s)", "Hanging on same child pair", leftChild.getId(), rightChild.getId());
+
+            if (assertsEnabled) {
+                oldLeftChild = leftChild;
+                oldRightChild = rightChild;
+            }
+
             if (!leftdone && !r.contains(leftChild)) {
                 assert (leftChild != null);
                 final T finalLeftChild = leftChild;
@@ -268,6 +282,24 @@ public class UnorderedMerge<T extends Artifact<T>> implements MergeInterface<T> 
                     rightChild = rightIt.next();
                 } else {
                     rightdone = true;
+                }
+            }
+
+            if (l.contains(rightChild) || r.contains(leftChild)) {
+                if (leftChild.isMerged()) {
+                    if (leftIt.hasNext()) {
+                        leftChild = leftIt.next();
+                    } else {
+                        leftdone = true;
+                    }
+                }
+
+                if (rightChild.isMerged()) {
+                    if (rightIt.hasNext()) {
+                        rightChild = rightIt.next();
+                    } else {
+                        rightdone = true;
+                    }
                 }
             }
 
