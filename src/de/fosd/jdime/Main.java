@@ -266,8 +266,8 @@ public final class Main {
 
         Statistics statistics = context.getStatistics();
 
-        String hrOut = config.get(STATISTICS_HR_OUTPUT).orElse(STATISTICS_OUTPUT_STDOUT);
-        String xmlOut = config.get(STATISTICS_XML_OUTPUT).orElse(STATISTICS_OUTPUT_OFF);
+        String hrOut = config.get(STATISTICS_HR_OUTPUT).orElse(STATISTICS_OUTPUT_OFF);
+        String xmlOut = config.get(STATISTICS_XML_OUTPUT).orElse(STATISTICS_OUTPUT_STDOUT);
 
         switch (hrOut) {
             case STATISTICS_OUTPUT_OFF:
